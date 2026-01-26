@@ -148,10 +148,27 @@
         }
 
         .hero-section {
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a1a2e 100%);
-            padding: 4rem 0;
+            padding: 6rem 0;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            padding-top: 100px;
         }
 
         .hero-title {
@@ -165,10 +182,11 @@
         }
 
         .hero-subtitle {
-            color: var(--text-secondary);
-            font-size: 1.2rem;
+            color: #ffffff;
+            font-size: 1.3rem;
             max-width: 600px;
-            margin: 0 auto 2rem;
+            margin: 0 auto;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
         .section-title {

@@ -1,5 +1,5 @@
 entrypoint = "index.html"
-modules = ["web", "python-3.11"]
+modules = ["web", "python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-24_11"

@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero-section">
-    <div class="container">
-        <h1 class="hero-title">MyDispatcher</h1>
-        <p class="hero-subtitle">The ultimate destination for GTA 5 mods. Browse, download, and enhance your gaming experience.</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg">
-                <i class="bi bi-collection"></i> Browse Mods
-            </a>
-            {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
-                <i class="bi bi-person-plus"></i> Join Now
-            </a>
-            {% endif %}
+<section class="hero-section" style="background: url('{{ url_for('uploaded_file', filename='images/mydispatcher_banner.jpg') }}') center center / cover no-repeat; position: relative;">
+    <div class="hero-overlay"></div>
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="hero-content">
+            <p class="hero-subtitle">The ultimate destination for GTA 5 mods. Browse, download, and enhance your gaming experience.</p>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-collection"></i> Browse Mods
+                </a>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-person-plus"></i> Join Now
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </section>
