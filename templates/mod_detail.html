@@ -71,6 +71,57 @@
                 </div>
             </div>
             {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-header bg-transparent border-bottom" style="border-color: var(--border-color) !important;">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Comments ({{ mod.comments|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" class="mb-4">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.content(class="form-control", rows="3", placeholder="Write a comment...") }}
+                            {% for error in form.content.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Post Comment
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info mb-4" style="background: rgba(0, 102, 255, 0.1); border-color: var(--primary-blue); color: var(--text-primary);">
+                        <i class="bi bi-info-circle"></i> <a href="{{ url_for('login') }}" style="color: var(--primary-blue);">Login</a> to post a comment
+                    </div>
+                    {% endif %}
+                    
+                    {% for comment in mod.comments %}
+                    <div class="comment-item mb-3 p-3" style="background: var(--bg-card-hover); border-radius: 8px; border-left: 3px solid var(--primary-blue);">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong style="color: var(--primary-blue);">
+                                    <i class="bi bi-person-circle"></i> {{ comment.user.username }}
+                                </strong>
+                                <small class="text-secondary ms-2">{{ comment.created_at.strftime('%b %d, %Y at %H:%M') }}</small>
+                            </div>
+                            {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.is_admin) %}
+                            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this comment?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <p class="mb-0" style="color: var(--text-primary);">{{ comment.content }}</p>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary text-center py-3 mb-0">
+                        <i class="bi bi-chat"></i> No comments yet. Be the first to comment!
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         
         <div class="col-lg-4">

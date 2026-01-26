@@ -16,6 +16,7 @@ A full-featured GTA 5 mod store with user authentication, admin panel, mod brows
 - Video upload support for mod previews
 - Custom download page with 5-second countdown timer
 - Dark theme with blue/black color scheme
+- Comment system on mod pages (users can comment, admins/owners can delete)
 
 ## Tech Stack
 - **Backend**: Python Flask
@@ -50,6 +51,7 @@ A full-featured GTA 5 mod store with user authentication, admin panel, mod brows
 - **User**: id, username, email, password_hash, is_admin, created_at
 - **Category**: id, name, description
 - **Mod**: id, title, description, version, file_path, image_path, video_path, download_count, category_id, is_featured, download_token
+- **Comment**: id, content, user_id, mod_id, created_at
 
 ## Default Categories
 - Vehicles

@@ -59,6 +59,15 @@ class Mod(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_featured = db.Column(db.Boolean, default=False)
     download_token = db.Column(db.String(100))
+    comments = db.relationship('Comment', backref='mod', lazy=True, order_by='Comment.created_at.desc()')
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref='comments')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -84,6 +93,9 @@ class ModForm(FlaskForm):
 class CategoryForm(FlaskForm):
     name = StringField('Category Name', validators=[DataRequired(), Length(max=100)])
     description = TextAreaField('Description')
+
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
 
 @app.route('/')
 def index():
@@ -162,11 +174,37 @@ def browse():
     return render_template('browse.html', mods=mods, categories=categories, 
                          current_category=category_id, search=search, sort=sort)
 
-@app.route('/mod/<int:mod_id>')
+@app.route('/mod/<int:mod_id>', methods=['GET', 'POST'])
 def mod_detail(mod_id):
     mod = Mod.query.get_or_404(mod_id)
+    form = CommentForm()
+    
+    if form.validate_on_submit() and current_user.is_authenticated:
+        comment = Comment(
+            content=form.content.data,
+            user_id=current_user.id,
+            mod_id=mod.id
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Comment added successfully!', 'success')
+        return redirect(url_for('mod_detail', mod_id=mod_id))
+    
     related_mods = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
-    return render_template('mod_detail.html', mod=mod, related_mods=related_mods)
+    return render_template('mod_detail.html', mod=mod, related_mods=related_mods, form=form)
+
+@app.route('/comment/delete/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if current_user.id == comment.user_id or current_user.is_admin:
+        mod_id = comment.mod_id
+        db.session.delete(comment)
+        db.session.commit()
+        flash('Comment deleted', 'success')
+        return redirect(url_for('mod_detail', mod_id=mod_id))
+    flash('Permission denied', 'error')
+    return redirect(url_for('index'))
 
 @app.route('/download/<int:mod_id>')
 def download_page(mod_id):
