@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #0a1a2e 0%, #1a1a3e 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-hover) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .admin-table {
+        background: var(--bg-card);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .admin-table th {
+        background: var(--bg-card-hover);
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .admin-table td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    .admin-table tbody tr:hover {
+        background: var(--bg-card-hover);
+    }
+    
+    .action-btns .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-speedometer2" style="color: var(--primary-blue);"></i> Admin Dashboard</h1>
+                <p class="text-secondary mb-0">Manage your mod store</p>
+            </div>
+            <div>
+                <a href="{{ url_for('admin_new_mod') }}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-lg"></i> Add Mod
+                </a>
+                <a href="{{ url_for('admin_new_category') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-folder-plus"></i> Add Category
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <i class="bi bi-controller"></i>
+                <div class="stat-number">{{ stats.total_mods }}</div>
+                <div class="stat-label">Total Mods</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <i class="bi bi-people"></i>
+                <div class="stat-number">{{ stats.total_users }}</div>
+                <div class="stat-label">Registered Users</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <i class="bi bi-download"></i>
+                <div class="stat-number">{{ stats.total_downloads }}</div>
+                <div class="stat-label">Total Downloads</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <i class="bi bi-folder"></i>
+                <div class="stat-number">{{ stats.total_categories }}</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center" style="border-color: var(--border-color);">
+                    <h5 class="mb-0"><i class="bi bi-controller"></i> Mods</h5>
+                    <a href="{{ url_for('admin_new_mod') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> Add New
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mod</th>
+                                <th>Category</th>
+                                <th>Downloads</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mod in mods %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if mod.image_path %}
+                                        <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" 
+                                             class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="rounded me-2 d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px; background: var(--bg-card-hover);">
+                                            <i class="bi bi-controller" style="color: var(--primary-blue);"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ mod.title }}</strong>
+                                            {% if mod.version %}<br><small class="text-secondary">v{{ mod.version }}</small>{% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ mod.category.name if mod.category else '-' }}</td>
+                                <td>{{ mod.download_count }}</td>
+                                <td>
+                                    {% if mod.is_featured %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> Featured</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td class="action-btns">
+                                    <a href="{{ url_for('mod_detail', mod_id=mod.id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin_edit_mod', mod_id=mod.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ url_for('admin_delete_mod', mod_id=mod.id) }}" method="POST" class="d-inline" 
+                                          onsubmit="return confirm('Are you sure you want to delete this mod?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-secondary">No mods yet. Add your first mod!</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center" style="border-color: var(--border-color);">
+                    <h5 class="mb-0"><i class="bi bi-folder"></i> Categories</h5>
+                    <a href="{{ url_for('admin_new_category') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+                <ul class="list-group list-group-flush" style="background: transparent;">
+                    {% for category in categories %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" 
+                        style="background: transparent; border-color: var(--border-color);">
+                        <div>
+                            <strong>{{ category.name }}</strong>
+                            <br><small class="text-secondary">{{ category.mods|length }} mods</small>
+                        </div>
+                        <form action="{{ url_for('admin_delete_category', cat_id=category.id) }}" method="POST" class="d-inline"
+                              onsubmit="return confirm('Delete this category?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-secondary" style="background: transparent;">
+                        No categories yet
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-transparent" style="border-color: var(--border-color);">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Recent Users</h5>
+                </div>
+                <ul class="list-group list-group-flush" style="background: transparent;">
+                    {% for user in users[:5] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" 
+                        style="background: transparent; border-color: var(--border-color);">
+                        <div>
+                            <strong>{{ user.username }}</strong>
+                            <br><small class="text-secondary">{{ user.email }}</small>
+                        </div>
+                        {% if user.is_admin %}
+                        <span class="badge bg-primary">Admin</span>
+                        {% else %}
+                        <span class="badge bg-secondary">User</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

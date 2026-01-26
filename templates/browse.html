@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Mods{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="section-title"><span>Browse</span> Mods</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form action="{{ url_for('browse') }}" method="GET" class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" class="form-control" placeholder="Search mods..." value="{{ search or '' }}">
+                {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+            </form>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end gap-2">
+            <select class="form-select w-auto" onchange="window.location.href='{{ url_for('browse') }}?sort=' + this.value + '{% if current_category %}&category={{ current_category }}{% endif %}{% if search %}&search={{ search }}{% endif %}'">
+                <option value="latest" {% if sort == 'latest' %}selected{% endif %}>Latest</option>
+                <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="category-filter">
+        <a href="{{ url_for('browse') }}{% if search %}?search={{ search }}{% endif %}{% if sort %}{% if search %}&{% else %}?{% endif %}sort={{ sort }}{% endif %}" 
+           class="btn btn-outline-secondary {% if not current_category %}active{% endif %}">All</a>
+        {% for category in categories %}
+        <a href="{{ url_for('browse', category=category.id) }}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+           class="btn btn-outline-secondary {% if current_category == category.id %}active{% endif %}">
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </div>
+    
+    <div class="row g-4">
+        {% for mod in mods.items %}
+        <div class="col-md-6 col-lg-3">
+            <a href="{{ url_for('mod_detail', mod_id=mod.id) }}" class="text-decoration-none">
+                <div class="card h-100">
+                    {% if mod.image_path %}
+                    <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" class="card-img-top" alt="{{ mod.title }}">
+                    {% else %}
+                    <div class="mod-placeholder">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge-category">{{ mod.category.name if mod.category else 'Uncategorized' }}</span>
+                            {% if mod.is_featured %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i></span>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ mod.title }}</h5>
+                        <p class="card-text">{{ mod.description[:80] }}{% if mod.description|length > 80 %}...{% endif %}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="download-count"><i class="bi bi-download"></i> {{ mod.download_count }}</span>
+                            {% if mod.version %}
+                            <span class="text-secondary small">v{{ mod.version }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search display-1 text-secondary"></i>
+            <p class="text-secondary mt-3">No mods found. Try adjusting your search or filters.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if mods.pages > 1 %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if mods.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('browse', page=mods.prev_num, category=current_category, search=search, sort=sort) }}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in mods.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == mods.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('browse', page=page_num, category=current_category, search=search, sort=sort) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if mods.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('browse', page=mods.next_num, category=current_category, search=search, sort=sort) }}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
