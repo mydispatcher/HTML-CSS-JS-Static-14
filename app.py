@@ -69,7 +69,7 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='comments')
 
-from replit_auth import make_replit_blueprint, logged_in
+from replit_auth import make_replit_blueprint
 app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
 
 @login_manager.user_loader

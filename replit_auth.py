@@ -17,7 +17,6 @@ from sqlalchemy.exc import NoResultFound
 from werkzeug.local import LocalProxy
 
 def make_replit_blueprint():
-    # Use internal import to avoid circular dependency
     from app import db, User
     repl_id = os.environ.get('REPL_ID', 'dev-repl-id')
     issuer_url = os.environ.get('ISSUER_URL', "https://replit.com/oidc")
@@ -59,10 +58,18 @@ def make_replit_blueprint():
 
     return replit_bp
 
+class UserSessionStorage(BaseStorage):
+    def get(self, blueprint):
+        return session.get(f"{blueprint.name}_oauth_token")
+
+    def set(self, blueprint, token):
+        session[f"{blueprint.name}_oauth_token"] = token
+
+    def delete(self, blueprint):
+        session.pop(f"{blueprint.name}_oauth_token", None)
 
 @oauth_authorized.connect
 def on_logged_in(blueprint, token):
-    # Use internal import to avoid circular dependency
     from app import db, User
     user_claims = jwt.decode(token['id_token'], options={"verify_signature": False})
     
@@ -71,10 +78,9 @@ def on_logged_in(blueprint, token):
     
     user = User.query.filter_by(email=email).first()
     if not user:
-        # Create user if doesn't exist
         username = email.split('@')[0]
         user = User(username=username, email=email)
-        user.set_password(str(uuid.uuid4())) # Random password for OAuth users
+        user.set_password(str(uuid.uuid4()))
         db.session.add(user)
         db.session.commit()
     
