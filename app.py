@@ -97,12 +97,22 @@ class CategoryForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
 
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+
+class ChangeEmailForm(FlaskForm):
+    new_email = StringField('New Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Current Password', validators=[DataRequired()])
+
 @app.route('/')
 def index():
     featured_mods = Mod.query.filter_by(is_featured=True).limit(6).all()
     latest_mods = Mod.query.order_by(Mod.created_at.desc()).limit(8).all()
     categories = Category.query.all()
-    return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories)
+    total_users = User.query.count()
+    return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories, total_users=total_users)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -392,6 +402,37 @@ def admin_delete_category(cat_id):
     db.session.commit()
     flash('Category deleted successfully!', 'success')
     return redirect(url_for('admin'))
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    password_form = ChangePasswordForm(prefix='password')
+    email_form = ChangeEmailForm(prefix='email')
+    
+    if request.method == 'POST':
+        if 'password-submit' in request.form:
+            if password_form.validate_on_submit():
+                if current_user.check_password(password_form.current_password.data):
+                    current_user.set_password(password_form.new_password.data)
+                    db.session.commit()
+                    flash('Password updated successfully!', 'success')
+                    return redirect(url_for('settings'))
+                else:
+                    flash('Current password is incorrect', 'error')
+        elif 'email-submit' in request.form:
+            if email_form.validate_on_submit():
+                if current_user.check_password(email_form.password.data):
+                    if User.query.filter_by(email=email_form.new_email.data).first():
+                        flash('Email already in use', 'error')
+                    else:
+                        current_user.email = email_form.new_email.data
+                        db.session.commit()
+                        flash('Email updated successfully!', 'success')
+                        return redirect(url_for('settings'))
+                else:
+                    flash('Password is incorrect', 'error')
+    
+    return render_template('settings.html', password_form=password_form, email_form=email_form)
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):

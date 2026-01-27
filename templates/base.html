@@ -317,9 +317,12 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.is_admin %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin') }}"><i class="bi bi-gear"></i> Admin</a>
+                            <a class="nav-link" href="{{ url_for('admin') }}"><i class="bi bi-speedometer2"></i> Admin</a>
                         </li>
                         {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('settings') }}"><i class="bi bi-gear"></i> Settings</a>
+                        </li>
                         <li class="nav-item">
                             <span class="nav-link"><i class="bi bi-person-circle"></i> {{ current_user.username }}</span>
                         </li>
