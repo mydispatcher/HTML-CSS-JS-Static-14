@@ -545,36 +545,33 @@
 
     <!-- HOME SECTION -->
     <section id="home" class="app-section active">
-        <div class="hero-section">
-            <div class="container">
+        <div class="hero-section" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for('static', filename='banner.webp') }}'); background-size: cover; background-position: center;">
+            <div class="container text-center">
                 <div class="premium-badge">Premium GTA V Mods</div>
-                <h1 class="hero-title">
-                    ELEVATE YOUR<br>
-                    <span class="highlight">ROLEPLAY</span>
+                <h1 class="hero-title" style="font-size: 5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                    <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
                 </h1>
-                <p class="hero-subtitle">
-                    The ultimate source for high-quality dispatch systems, EUP packs, and scripts for your FiveM server. Built by developers, for communities.
+                <p class="hero-subtitle mx-auto" style="font-size: 1.5rem; text-shadow: 1px 1px 5px rgba(0,0,0,0.8);">
+                    The ultimate source for high-quality dispatch systems, EUP packs, and scripts for your FiveM server.
                 </p>
-                <div class="d-flex gap-3">
-                    <button onclick="showSection('browse')" class="btn-primary-custom">
+                <div class="d-flex gap-3 justify-content-center mt-4">
+                    <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg">
                         Browse Shop <i class="bi bi-chevron-right"></i>
-                    </button>
-                    <button onclick="scrollToFeatured()" class="btn-outline-custom">
-                        View Featured
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
 
         <div class="stats-section">
             <div class="container">
-                <div class="row g-4">
+                <div class="row g-4 text-center">
                     <div class="col-md-4">
                         <div class="stat-card">
                             <div class="stat-icon blue">
                                 <i class="bi bi-box-seam"></i>
                             </div>
-                            <div class="stat-number blue" id="stat-mods">5</div>
+                            <div class="stat-number blue">{{ latest_mods|length if latest_mods else 0 }}</div>
+                            <div class="text-secondary">Total Mods</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -582,7 +579,8 @@
                             <div class="stat-icon red">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <div class="stat-number red" id="stat-users">2</div>
+                            <div class="stat-number red">{{ total_users if total_users else 0 }}</div>
+                            <div class="text-secondary">Active Users</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -590,7 +588,8 @@
                             <div class="stat-icon green">
                                 <i class="bi bi-download"></i>
                             </div>
-                            <div class="stat-number green" id="stat-downloads">1</div>
+                            <div class="stat-number green">{% set total_dl = 0 %}{% for m in featured_mods %}{% set total_dl = total_dl + m.download_count %}{% endfor %}{{ total_dl }}</div>
+                            <div class="text-secondary">Total Downloads</div>
                         </div>
                     </div>
                 </div>

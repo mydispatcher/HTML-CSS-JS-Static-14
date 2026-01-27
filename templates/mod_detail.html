@@ -19,13 +19,21 @@
         <div class="col-lg-8">
             <div class="card mb-4">
                 {% if mod.video_path %}
-                <video controls class="w-100" style="max-height: 400px; background: #000;">
-                    <source src="{{ url_for('uploaded_file', filename=mod.video_path.replace('uploads/', '')) }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                {% elif mod.image_path %}
-                <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" class="w-100" style="max-height: 400px; object-fit: cover;" alt="{{ mod.title }}">
-                {% else %}
+                <div class="video-container">
+                    <video controls class="w-100" style="max-height: 500px; background: #000; border-radius: 12px 12px 0 0;">
+                        <source src="{{ url_for('uploaded_file', filename=mod.video_path.replace('uploads/', '')) }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% endif %}
+                
+                {% if mod.image_path %}
+                <div class="{% if mod.video_path %}mt-3{% endif %} p-3">
+                    <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" class="w-100 rounded" style="max-height: 500px; object-fit: cover;" alt="{{ mod.title }}">
+                </div>
+                {% endif %}
+                
+                {% if not mod.image_path and not mod.video_path %}
                 <div class="mod-placeholder" style="height: 300px;">
                     <i class="bi bi-controller" style="font-size: 5rem;"></i>
                 </div>

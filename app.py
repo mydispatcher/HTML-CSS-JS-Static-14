@@ -231,12 +231,13 @@ def download_file(mod_id, token):
         flash('Invalid download link', 'error')
         return redirect(url_for('mod_detail', mod_id=mod_id))
     
-    mod.download_count += 1
+    # Increment download count
+    mod.download_count = (mod.download_count or 0) + 1
     mod.download_token = None
     db.session.commit()
     
     if mod.file_path:
-        directory = os.path.dirname(mod.file_path)
+        directory = os.path.dirname(os.path.abspath(mod.file_path))
         filename = os.path.basename(mod.file_path)
         return send_from_directory(directory, filename, as_attachment=True)
     
