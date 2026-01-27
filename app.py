@@ -95,7 +95,10 @@ class CategoryForm(FlaskForm):
     description = TextAreaField('Description')
 
 class CommentForm(FlaskForm):
-    content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
+    content = TextAreaField('Comment', validators=[
+        DataRequired(message="Comment cannot be empty"),
+        Length(min=1, max=1000, message="Comment must be at least 1 character long")
+    ])
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])

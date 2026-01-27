@@ -525,10 +525,8 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" onclick="showSection('home')" style="cursor: pointer;">
-                <div class="logo-icon">
-                    <i class="bi bi-shield-fill" style="font-size: 1rem;"></i>
-                </div>
-                MY<span>DISPATCHER</span>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 40px; margin-right: 10px;">
+                <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
             </a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
@@ -643,10 +641,8 @@
                 <div class="row">
                     <div class="col-md-4 mb-4">
                         <div class="footer-brand">
-                            <div class="logo-icon" style="width: 24px; height: 24px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-shield-fill" style="font-size: 0.7rem;"></i>
-                            </div>
-                            MY<span>DISPATCHER</span>
+                            <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 30px; margin-right: 10px;">
+                            <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
                         </div>
                         <p class="footer-text">
                             Providing high-quality resources for the FiveM community. Enhance your server with our premium dispatch systems and modifications.

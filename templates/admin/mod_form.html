@@ -18,16 +18,13 @@
                     {{ form.hidden_tag() }}
                     
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Title *</label>
                                 {{ form.title(class="form-control", placeholder="Enter mod title") }}
-                                {% for error in form.title.errors %}
-                                <div class="text-danger small mt-1">{{ error }}</div>
-                                {% endfor %}
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Version</label>
                                 {{ form.version(class="form-control", placeholder="e.g., 1.0.0") }}
@@ -37,10 +34,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Description *</label>
-                        {{ form.description(class="form-control", rows="5", placeholder="Describe your mod...") }}
-                        {% for error in form.description.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
+                        {{ form.description(class="form-control", rows="4", placeholder="Describe your mod...") }}
                     </div>
                     
                     <div class="row">
@@ -54,66 +48,30 @@
                             <div class="mb-3 pt-4">
                                 <div class="form-check">
                                     {{ form.is_featured(class="form-check-input") }}
-                                    <label class="form-check-label" for="is_featured">
-                                        <i class="bi bi-star-fill text-warning"></i> Featured Mod
-                                    </label>
+                                    <label class="form-check-label" for="is_featured">Featured Mod</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <hr style="border-color: var(--border-color);" class="my-4">
+                    <hr class="my-4 border-secondary">
                     
-                    <h5 class="mb-3"><i class="bi bi-cloud-upload"></i> File Uploads</h5>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Mod File</label>
-                                <input type="file" name="mod_file" class="form-control" accept=".zip,.rar,.7z,.oiv">
-                                <small class="text-secondary">ZIP, RAR, 7Z, OIV</small>
-                                {% if mod and mod.file_path %}
-                                <div class="mt-2">
-                                    <span class="badge bg-success"><i class="bi bi-check"></i> File uploaded</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Cover Image</label>
-                                <input type="file" name="image" class="form-control" accept="image/*">
-                                <small class="text-secondary">JPG, PNG, GIF</small>
-                                {% if mod and mod.image_path %}
-                                <div class="mt-2">
-                                    <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" 
-                                         class="img-thumbnail" style="max-height: 80px;">
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Video Preview</label>
-                                <input type="file" name="video" class="form-control" accept="video/*">
-                                <small class="text-secondary">MP4, WebM, MOV</small>
-                                {% if mod and mod.video_path %}
-                                <div class="mt-2">
-                                    <span class="badge bg-success"><i class="bi bi-check"></i> Video uploaded</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mod File (ZIP/RAR) *</label>
+                        <input type="file" name="mod_file" class="form-control" accept=".zip,.rar,.7z">
                     </div>
                     
-                    <hr style="border-color: var(--border-color);" class="my-4">
-                    
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg"></i> {% if mod %}Update{% else %}Create{% endif %} Mod
-                        </button>
+                    <div class="mb-3">
+                        <label class="form-label">Cover Image *</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
                     </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Video Preview (Optional)</label>
+                        <input type="file" name="video" class="form-control" accept="video/*">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Publish Mod</button>
                 </form>
             </div>
         </div>
