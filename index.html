@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyDispatcher - GTA 5 Mod Store</title>
+    <title>MyDispatcher - Premium GTA V Mods</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #0066ff;
-            --primary-blue-dark: #0052cc;
-            --bg-dark: #0a0a0a;
-            --bg-card: #111111;
-            --bg-card-hover: #1a1a1a;
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #2563eb;
+            --bg-dark: #0c0c14;
+            --bg-card: #12121c;
+            --bg-card-hover: #1a1a28;
             --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --border-color: #222222;
-            --accent-blue: #00aaff;
+            --text-secondary: #6b7280;
+            --border-color: #1e1e2e;
+            --accent-blue: #60a5fa;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
         }
 
         * {
@@ -33,152 +35,392 @@
         }
 
         .navbar {
-            background: linear-gradient(180deg, #111111 0%, var(--bg-dark) 100%);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
+            background: transparent;
+            padding: 1.25rem 0;
+            position: absolute;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
         }
 
         .navbar-brand {
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: var(--primary-blue) !important;
-            letter-spacing: 1px;
+            color: var(--text-primary) !important;
             text-decoration: none;
-            cursor: pointer;
+        }
+
+        .navbar-brand .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .navbar-brand span {
-            color: var(--text-primary);
+            color: var(--text-secondary);
         }
 
         .nav-link {
             color: var(--text-secondary) !important;
             font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             transition: color 0.3s ease;
-            margin: 0 0.5rem;
-            cursor: pointer;
+            margin: 0 1rem;
             text-decoration: none;
+            cursor: pointer;
         }
 
-        .nav-link:hover {
+        .nav-link:hover, .nav-link.active {
             color: var(--primary-blue) !important;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-            border: none;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: white;
-            text-decoration: none;
+        .user-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .hero-section {
+            padding: 10rem 0 6rem;
+            position: relative;
+            min-height: 600px;
+        }
+
+        .premium-badge {
             display: inline-block;
-            border-radius: 6px;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--primary-blue) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4);
-        }
-
-        .btn-outline-primary {
-            border: 1px solid var(--primary-blue);
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
             color: var(--primary-blue);
-            padding: 0.5rem 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .hero-title .highlight {
+            color: var(--primary-blue);
+        }
+
+        .hero-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary-blue);
+            border: none;
+            padding: 0.875rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
             border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: var(--primary-blue);
             color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .card {
-            background-color: var(--bg-card);
+        .btn-primary-custom:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.875rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .stats-section {
+            padding: 4rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            transition: all 0.3s ease;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue { color: var(--primary-blue); }
+        .stat-icon.red { color: var(--accent-red); }
+        .stat-icon.green { color: var(--accent-green); }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-number.blue { color: var(--primary-blue); }
+        .stat-number.red { color: var(--accent-red); }
+        .stat-number.green { color: var(--accent-green); }
+
+        .featured-section {
+            padding: 4rem 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .view-all-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .view-all-link:hover {
+            text-decoration: underline;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             overflow: hidden;
+            transition: all 0.3s ease;
             height: 100%;
             cursor: pointer;
         }
 
-        .card:hover {
-            background-color: var(--bg-card-hover);
+        .product-card:hover {
             border-color: var(--primary-blue);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.2);
+            transform: translateY(-4px);
         }
 
-        .mod-placeholder {
-            height: 180px;
+        .product-image {
+            height: 160px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid var(--border-color);
+            position: relative;
         }
 
-        .mod-placeholder i {
-            font-size: 3rem;
+        .product-image h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .category-badge.scripts {
+            background: rgba(59, 130, 246, 0.2);
             color: var(--primary-blue);
         }
 
-        .card-body {
+        .category-badge.eup {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .category-badge.maps {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        .product-body {
             padding: 1.25rem;
         }
 
-        .card-title {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-        }
-
-        .card-text {
-            color: var(--text-secondary);
+        .product-title {
             font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-title .price {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .product-desc {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
             margin-bottom: 1rem;
+            line-height: 1.5;
         }
 
-        .badge-category {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
+        .product-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-details {
+            flex: 1;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border-color);
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
         }
 
-        .hero-section {
-            padding: 8rem 0;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            min-height: 500px;
+        .btn-details:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .btn-get-mod {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--accent-green);
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            color: var(--accent-green);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            gap: 0.5rem;
         }
 
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
-            z-index: 1;
+        .btn-get-mod:hover {
+            background: var(--accent-green);
+            color: white;
         }
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-brand span {
+            color: var(--text-secondary);
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        .footer-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-blue);
         }
 
         .app-section {
@@ -200,7 +442,44 @@
             background-color: var(--bg-card-hover);
             border-color: var(--primary-blue);
             color: var(--text-primary);
-            box-shadow: 0 0 0 0.2rem rgba(0, 102, 255, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .browse-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .browse-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-4px);
+        }
+
+        .browse-card .mod-placeholder {
+            height: 180px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .browse-card .mod-placeholder i {
+            font-size: 3rem;
+            color: var(--primary-blue);
+        }
+
+        .browse-card .card-body {
+            padding: 1.25rem;
         }
 
         .comment-item {
@@ -209,22 +488,6 @@
             padding: 1.5rem;
             margin-bottom: 1rem;
             border-left: 4px solid var(--primary-blue);
-        }
-
-        .filter-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 0.5rem 1.25rem;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn.active, .filter-btn:hover {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
-            color: white;
         }
 
         .download-timer {
@@ -249,8 +512,6 @@
             text-align: center;
             color: #ff4444;
         }
-
-        .cursor-pointer { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -258,18 +519,22 @@
         <i class="bi bi-shield-lock-fill display-1 mb-4"></i>
         <h1>ACCESS BLOCKED</h1>
         <p>Suspicious activity detected by client-side firewall.</p>
-        <button class="btn btn-primary mt-4" onclick="location.reload()">Reset Connection</button>
+        <button class="btn btn-primary-custom mt-4" onclick="location.reload()">Reset Connection</button>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" onclick="showSection('home')">
-                My<span>Dispatcher</span>
+            <a class="navbar-brand" onclick="showSection('home')" style="cursor: pointer;">
+                <div class="logo-icon">
+                    <i class="bi bi-shield-fill" style="font-size: 1rem;"></i>
+                </div>
+                MY<span>DISPATCHER</span>
             </a>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('home')">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('browse')">Browse</a></li>
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link active" onclick="showSection('home')">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('browse')">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('admin')" id="admin-link" style="display: none;">Admin</a></li>
                 </ul>
                 <ul class="navbar-nav" id="auth-nav"></ul>
             </div>
@@ -278,28 +543,110 @@
 
     <div id="flash-messages" class="container mt-3"></div>
 
-    <!-- SECTIONS -->
+    <!-- HOME SECTION -->
     <section id="home" class="app-section active">
         <div class="hero-section">
-            <div class="hero-overlay"></div>
-            <div class="container hero-content">
-                <h1 class="display-3 fw-bold mb-3">MyDispatcher</h1>
-                <p class="lead mb-4">The ultimate destination for GTA 5 mods.</p>
-                <div class="d-flex justify-content-center gap-3">
-                    <button onclick="showSection('browse')" class="btn btn-primary btn-lg">Browse Mods</button>
-                    <button onclick="showSection('register')" class="btn btn-outline-primary btn-lg" id="join-btn">Join Now</button>
+            <div class="container">
+                <div class="premium-badge">Premium GTA V Mods</div>
+                <h1 class="hero-title">
+                    ELEVATE YOUR<br>
+                    <span class="highlight">ROLEPLAY</span>
+                </h1>
+                <p class="hero-subtitle">
+                    The ultimate source for high-quality dispatch systems, EUP packs, and scripts for your FiveM server. Built by developers, for communities.
+                </p>
+                <div class="d-flex gap-3">
+                    <button onclick="showSection('browse')" class="btn-primary-custom">
+                        Browse Shop <i class="bi bi-chevron-right"></i>
+                    </button>
+                    <button onclick="scrollToFeatured()" class="btn-outline-custom">
+                        View Featured
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="container my-5">
-            <h2 class="section-title"><span>Latest</span> Mods</h2>
-            <div class="row g-4" id="home-mods"></div>
+
+        <div class="stats-section">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div class="stat-number blue" id="stat-mods">5</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon red">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="stat-number red" id="stat-users">2</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="bi bi-download"></i>
+                            </div>
+                            <div class="stat-number green" id="stat-downloads">1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <div class="featured-section" id="featured">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Featured Resources</h2>
+                    <a href="#" onclick="showSection('browse'); return false;" class="view-all-link">View All Products</a>
+                </div>
+                <p class="text-secondary mb-4">Top rated mods chosen by our community</p>
+                <div class="row g-4" id="featured-mods"></div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="footer-brand">
+                            <div class="logo-icon" style="width: 24px; height: 24px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-shield-fill" style="font-size: 0.7rem;"></i>
+                            </div>
+                            MY<span>DISPATCHER</span>
+                        </div>
+                        <p class="footer-text">
+                            Providing high-quality resources for the FiveM community. Enhance your server with our premium dispatch systems and modifications.
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h5 class="footer-title">Resources</h5>
+                        <ul class="footer-links">
+                            <li><a href="#" onclick="showSection('browse'); return false;">All Mods</a></li>
+                            <li><a href="#">Vehicles</a></li>
+                            <li><a href="#">Scripts</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h5 class="footer-title">Support</h5>
+                        <ul class="footer-links">
+                            <li><a href="#">Discord</a></li>
+                            <li><a href="#">Documentation</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </section>
 
+    <!-- BROWSE SECTION -->
     <section id="browse" class="app-section">
-        <div class="container py-5">
-            <h1 class="section-title"><span>Browse</span> Mods</h1>
+        <div class="container py-5" style="padding-top: 8rem !important;">
+            <h1 class="section-title mb-4">Browse <span class="highlight">Mods</span></h1>
             <div class="row mb-4">
                 <div class="col-md-8">
                     <input type="text" id="search-input" class="form-control" placeholder="Search mods..." oninput="renderBrowse()">
@@ -309,12 +656,14 @@
         </div>
     </section>
 
+    <!-- MOD DETAIL SECTION -->
     <section id="mod-detail" class="app-section">
-        <div class="container py-5" id="detail-content"></div>
+        <div class="container py-5" id="detail-content" style="padding-top: 8rem !important;"></div>
     </section>
 
+    <!-- DOWNLOAD SECTION -->
     <section id="download" class="app-section">
-        <div class="container py-5 text-center">
+        <div class="container py-5 text-center" style="padding-top: 8rem !important;">
             <div class="card p-5 mx-auto" style="max-width: 600px;">
                 <h2>Preparing Download</h2>
                 <p class="text-secondary">Your file is being unlocked for secure transfer.</p>
@@ -329,23 +678,25 @@
         </div>
     </section>
 
+    <!-- LOGIN SECTION -->
     <section id="login" class="app-section">
-        <div class="container py-5">
+        <div class="container py-5" style="padding-top: 8rem !important;">
             <div class="row justify-content-center">
                 <div class="col-md-4 card p-4">
                     <h2 class="text-center mb-4">Login</h2>
                     <form onsubmit="handleLogin(event)">
                         <input type="email" id="login-email" class="form-control mb-3" placeholder="Email" required>
                         <input type="password" id="login-pass" class="form-control mb-4" placeholder="Password" required>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" class="btn-primary-custom w-100">Login</button>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- REGISTER SECTION -->
     <section id="register" class="app-section">
-        <div class="container py-5">
+        <div class="container py-5" style="padding-top: 8rem !important;">
             <div class="row justify-content-center">
                 <div class="col-md-4 card p-4">
                     <h2 class="text-center mb-4">Register</h2>
@@ -353,23 +704,78 @@
                         <input type="text" id="reg-user" class="form-control mb-3" placeholder="Username" required>
                         <input type="email" id="reg-email" class="form-control mb-3" placeholder="Email" required>
                         <input type="password" id="reg-pass" class="form-control mb-4" placeholder="Password" required>
-                        <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                        <button type="submit" class="btn-primary-custom w-100">Create Account</button>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- UPLOAD SECTION -->
     <section id="upload" class="app-section">
-        <div class="container py-5">
+        <div class="container py-5" style="padding-top: 8rem !important;">
             <div class="row justify-content-center">
                 <div class="col-md-6 card p-4">
                     <h2 class="text-center mb-4">Upload New Mod</h2>
                     <form onsubmit="handleUpload(event)">
                         <input type="text" id="up-title" class="form-control mb-3" placeholder="Mod Title" required>
                         <textarea id="up-desc" class="form-control mb-3" placeholder="Description" rows="4" required></textarea>
+                        <select id="up-category" class="form-control mb-3">
+                            <option value="scripts">Scripts</option>
+                            <option value="eup">EUP</option>
+                            <option value="maps">Maps</option>
+                        </select>
                         <input type="text" id="up-version" class="form-control mb-4" placeholder="Version (e.g. 1.0.0)" required>
-                        <button type="submit" class="btn btn-primary w-100">Publish Mod</button>
+                        <button type="submit" class="btn-primary-custom w-100">Publish Mod</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN SECTION -->
+    <section id="admin" class="app-section">
+        <div class="container py-5" style="padding-top: 8rem !important;">
+            <h1 class="section-title mb-4">Admin <span class="highlight">Dashboard</span></h1>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Total Mods</h3>
+                        <div class="stat-number blue" id="admin-mods">0</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <div class="stat-number red" id="admin-users">0</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Total Downloads</h3>
+                        <div class="stat-number green" id="admin-downloads">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <h3 class="mb-3">All Mods</h3>
+                <div id="admin-mod-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SETTINGS SECTION -->
+    <section id="settings" class="app-section">
+        <div class="container py-5" style="padding-top: 8rem !important;">
+            <div class="row justify-content-center">
+                <div class="col-md-6 card p-4">
+                    <h2 class="text-center mb-4">Account Settings</h2>
+                    <form onsubmit="handleSettings(event)">
+                        <label class="text-secondary mb-2">Username</label>
+                        <input type="text" id="set-user" class="form-control mb-3" placeholder="Username">
+                        <label class="text-secondary mb-2">New Password</label>
+                        <input type="password" id="set-pass" class="form-control mb-4" placeholder="Leave blank to keep current">
+                        <button type="submit" class="btn-primary-custom w-100">Save Changes</button>
                     </form>
                 </div>
             </div>
@@ -377,15 +783,15 @@
     </section>
 
     <script>
-        // DATASTORE
         const db = {
             get: (key) => JSON.parse(localStorage.getItem('md_' + key)) || [],
             set: (key, val) => localStorage.setItem('md_' + key, JSON.stringify(val)),
             init: () => {
                 if (!db.get('mods').length) {
                     db.set('mods', [
-                        { id: 1, title: 'LSPD Overhaul', desc: 'Total police overhaul script.', version: '2.5', downloads: 540, comments: [] },
-                        { id: 2, title: '4K Texture Pack', desc: 'Ultra HD textures for Los Santos.', version: '1.0', downloads: 1200, comments: [] }
+                        { id: 1, title: 'Dispatch Audio', desc: 'Realistic police radio chatter and dispatch audio replacement. Adds immersion to your patrols.', version: '1.0', downloads: 540, category: 'scripts', comments: [] },
+                        { id: 2, title: 'SAHP EUP', desc: 'Complete uniform pack for SAHP. Includes Class A, B, and C uniforms, jackets, and hats.', version: '2.0', downloads: 320, category: 'eup', comments: [] },
+                        { id: 3, title: 'Sandy Station', desc: 'A complete overhaul of the Sandy Shores Sheriff Station. New interior, exterior lighting, and parking.', version: '1.5', downloads: 180, category: 'maps', comments: [] }
                     ]);
                 }
                 if (!db.get('users').length) {
@@ -396,7 +802,6 @@
 
         let currentUser = JSON.parse(sessionStorage.getItem('user')) || null;
 
-        // SECURITY & FIREWALL
         const sanitize = (str) => {
             const div = document.createElement('div');
             div.textContent = str;
@@ -411,53 +816,107 @@
             }
         };
 
-        // NAV
         function showSection(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            if (id === 'home') document.querySelector('.nav-link[onclick*="home"]').classList.add('active');
+            if (id === 'browse') document.querySelector('.nav-link[onclick*="browse"]').classList.add('active');
             renderNav();
             if (id === 'home') renderHome();
             if (id === 'browse') renderBrowse();
+            if (id === 'admin') renderAdmin();
+            if (id === 'settings') renderSettings();
+            window.scrollTo(0, 0);
+        }
+
+        function scrollToFeatured() {
+            document.getElementById('featured').scrollIntoView({ behavior: 'smooth' });
         }
 
         function renderNav() {
             const nav = document.getElementById('auth-nav');
+            const adminLink = document.getElementById('admin-link');
             if (currentUser) {
+                adminLink.style.display = currentUser.isAdmin ? 'block' : 'none';
                 nav.innerHTML = `
                     <li class="nav-item"><a class="nav-link" onclick="showSection('upload')">Upload</a></li>
-                    <li class="nav-item"><span class="nav-link text-white">${currentUser.user}</span></li>
-                    <li class="nav-item"><a class="nav-link" onclick="logout()">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('settings')"><i class="bi bi-gear"></i></a></li>
+                    <li class="nav-item">
+                        <div class="user-icon" onclick="logout()" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
+                    </li>
                 `;
-                document.getElementById('join-btn').style.display = 'none';
             } else {
+                adminLink.style.display = 'none';
                 nav.innerHTML = `
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('login')">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('register')">Register</a></li>
+                    <li class="nav-item">
+                        <div class="user-icon" onclick="showSection('login')" title="Login">
+                            <i class="bi bi-person"></i>
+                        </div>
+                    </li>
                 `;
-                document.getElementById('join-btn').style.display = 'block';
             }
         }
 
-        // APP LOGIC
         function renderHome() {
-            const mods = db.get('mods').slice(0, 6);
-            document.getElementById('home-mods').innerHTML = mods.map(m => renderCard(m)).join('');
+            const mods = db.get('mods');
+            const users = db.get('users');
+            const totalDownloads = mods.reduce((sum, m) => sum + m.downloads, 0);
+            
+            document.getElementById('stat-mods').textContent = mods.length;
+            document.getElementById('stat-users').textContent = users.length;
+            document.getElementById('stat-downloads').textContent = totalDownloads;
+
+            const featured = mods.slice(0, 3);
+            document.getElementById('featured-mods').innerHTML = featured.map(m => renderFeaturedCard(m)).join('');
+        }
+
+        function renderFeaturedCard(m) {
+            const categoryClass = m.category || 'scripts';
+            const categoryLabel = (m.category || 'scripts').toUpperCase();
+            return `
+                <div class="col-md-4">
+                    <div class="product-card" onclick="viewMod(${m.id})">
+                        <div class="product-image">
+                            <span class="category-badge ${categoryClass}">
+                                <i class="bi bi-${categoryClass === 'scripts' ? 'code-slash' : categoryClass === 'eup' ? 'person-badge' : 'map'}"></i> ${categoryLabel}
+                            </span>
+                            <h3>${sanitize(m.title)}</h3>
+                        </div>
+                        <div class="product-body">
+                            <div class="product-title">
+                                ${sanitize(m.title).toUpperCase()}
+                                <span class="price">FREE</span>
+                            </div>
+                            <p class="product-desc">${sanitize(m.desc).substring(0, 80)}${m.desc.length > 80 ? '...' : ''}</p>
+                            <div class="product-actions">
+                                <button class="btn-details" onclick="event.stopPropagation(); viewMod(${m.id})">Details</button>
+                                <button class="btn-get-mod" onclick="event.stopPropagation(); startDownload(${m.id})">
+                                    <i class="bi bi-download"></i> Get Mod
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderBrowse() {
             const q = document.getElementById('search-input').value.toLowerCase();
             const mods = db.get('mods').filter(m => m.title.toLowerCase().includes(q));
-            document.getElementById('browse-list').innerHTML = mods.map(m => renderCard(m)).join('');
+            document.getElementById('browse-list').innerHTML = mods.map(m => renderBrowseCard(m)).join('');
         }
 
-        function renderCard(m) {
+        function renderBrowseCard(m) {
             return `
                 <div class="col-md-4">
-                    <div class="card" onclick="viewMod(${m.id})">
+                    <div class="browse-card" onclick="viewMod(${m.id})">
                         <div class="mod-placeholder"><i class="bi bi-controller"></i></div>
                         <div class="card-body">
-                            <h5 class="card-title">${sanitize(m.title)}</h5>
-                            <p class="card-text text-truncate">${sanitize(m.desc)}</p>
+                            <h5 class="mb-2">${sanitize(m.title)}</h5>
+                            <p class="text-secondary small mb-2">${sanitize(m.desc).substring(0, 60)}...</p>
                             <div class="d-flex justify-content-between small text-secondary">
                                 <span>v${m.version}</span>
                                 <span><i class="bi bi-download"></i> ${m.downloads}</span>
@@ -476,8 +935,8 @@
                     <div class="col-lg-8">
                         <div class="card p-4">
                             <h1>${sanitize(mod.title)}</h1>
-                            <p class="lead">${sanitize(mod.desc)}</p>
-                            <hr>
+                            <p class="lead text-secondary">${sanitize(mod.desc)}</p>
+                            <hr style="border-color: var(--border-color);">
                             <h3>Comments</h3>
                             <div id="comment-list">
                                 ${mod.comments.map(c => `<div class="comment-item"><strong>${sanitize(c.user)}:</strong> ${sanitize(c.text)}</div>`).join('')}
@@ -485,20 +944,52 @@
                             ${currentUser ? `
                                 <div class="mt-4">
                                     <textarea id="comment-text" class="form-control mb-2" placeholder="Post a comment..."></textarea>
-                                    <button class="btn btn-primary" onclick="postComment(${mod.id})">Post</button>
+                                    <button class="btn-primary-custom" onclick="postComment(${mod.id})">Post</button>
                                 </div>
-                            ` : '<p class="mt-4">Login to comment.</p>'}
+                            ` : '<p class="mt-4 text-secondary">Login to comment.</p>'}
                         </div>
                     </div>
                     <div class="col-lg-4">
                         <div class="card p-4 text-center">
                             <h3>Get Mod</h3>
-                            <button onclick="startDownload(${mod.id})" class="btn btn-primary btn-lg w-100">Download</button>
+                            <button onclick="startDownload(${mod.id})" class="btn-primary-custom w-100">
+                                <i class="bi bi-download"></i> Download
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
             showSection('mod-detail');
+        }
+
+        function renderAdmin() {
+            const mods = db.get('mods');
+            const users = db.get('users');
+            const totalDownloads = mods.reduce((sum, m) => sum + m.downloads, 0);
+
+            document.getElementById('admin-mods').textContent = mods.length;
+            document.getElementById('admin-users').textContent = users.length;
+            document.getElementById('admin-downloads').textContent = totalDownloads;
+
+            document.getElementById('admin-mod-list').innerHTML = mods.map(m => `
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${sanitize(m.title)}</strong>
+                            <span class="text-secondary ms-2">v${m.version}</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMod(${m.id})">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSettings() {
+            if (currentUser) {
+                document.getElementById('set-user').value = currentUser.user;
+            }
         }
 
         function handleLogin(e) {
@@ -547,13 +1038,38 @@
             e.preventDefault();
             const title = document.getElementById('up-title').value;
             const desc = document.getElementById('up-desc').value;
+            const category = document.getElementById('up-category').value;
             const ver = document.getElementById('up-version').value;
             checkFirewall(title + desc + ver);
             const mods = db.get('mods');
-            mods.push({ id: Date.now(), title, desc, version: ver, downloads: 0, comments: [] });
+            mods.push({ id: Date.now(), title, desc, category, version: ver, downloads: 0, comments: [] });
             db.set('mods', mods);
             alert('Mod Published!');
             showSection('browse');
+        }
+
+        function handleSettings(e) {
+            e.preventDefault();
+            const newUser = document.getElementById('set-user').value;
+            const newPass = document.getElementById('set-pass').value;
+            const users = db.get('users');
+            const idx = users.findIndex(u => u.email === currentUser.email);
+            if (idx !== -1) {
+                users[idx].user = newUser;
+                if (newPass) users[idx].pass = newPass;
+                db.set('users', users);
+                currentUser.user = newUser;
+                sessionStorage.setItem('user', JSON.stringify(currentUser));
+                alert('Settings saved!');
+            }
+        }
+
+        function deleteMod(id) {
+            if (confirm('Delete this mod?')) {
+                const mods = db.get('mods').filter(m => m.id !== id);
+                db.set('mods', mods);
+                renderAdmin();
+            }
         }
 
         function startDownload(id) {
@@ -569,7 +1085,7 @@
                     timer.innerText = "READY";
                     btn.disabled = false;
                     btn.classList.remove('btn-secondary');
-                    btn.classList.add('btn-primary');
+                    btn.classList.add('btn-primary-custom');
                     btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Download File';
                     btn.onclick = () => {
                         const mods = db.get('mods');
