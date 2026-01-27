@@ -528,13 +528,43 @@
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 40px; margin-right: 10px;">
                 <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
             </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active" onclick="showSection('home')">Home</a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showSection('browse')">Shop</a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('admin')" id="admin-link" style="display: none;">Admin</a></li>
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('admin')">Admin</a></li>
+                    {% endif %}
                 </ul>
-                <ul class="navbar-nav" id="auth-nav"></ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <span>{{ current_user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="bi bi-gear"></i> Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-custom me-2" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary-custom" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
@@ -568,7 +598,7 @@
                             <div class="stat-icon blue">
                                 <i class="bi bi-box-seam"></i>
                             </div>
-                            <div class="stat-number blue counter" data-target="{{ latest_mods|length if latest_mods else 0 }}">0</div>
+                            <div class="stat-number blue counter" id="stat-mods-count" data-target="{{ latest_mods|length if latest_mods else 0 }}">0</div>
                             <div class="text-secondary">Total Mods</div>
                         </div>
                     </div>

@@ -1,7 +1,12 @@
-import os
 from flask import Flask, render_template, redirect, url_for, flash, request, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
+import os
+
+app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
