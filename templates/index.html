@@ -884,19 +884,25 @@
         <div class="container py-5" style="padding-top: 8rem !important;">
             <h1 class="section-title mb-4">Admin <span class="highlight">Dashboard</span></h1>
             <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <button class="btn btn-primary-custom w-100 h-100 d-flex flex-column align-items-center justify-content-center gap-2 p-4" onclick="showSection('upload')">
+                        <i class="bi bi-plus-circle fs-1"></i>
+                        <span>Publish New Mod</span>
+                    </button>
+                </div>
+                <div class="col-md-3">
                     <div class="stat-card">
                         <h3>Total Mods</h3>
                         <div class="stat-number blue" id="admin-mods">0</div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="stat-card">
                         <h3>Total Users</h3>
                         <div class="stat-number red" id="admin-users">0</div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="stat-card">
                         <h3>Total Downloads</h3>
                         <div class="stat-number green" id="admin-downloads">0</div>
