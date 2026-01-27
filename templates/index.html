@@ -538,23 +538,17 @@
                     <li class="nav-item"><a class="nav-link active" onclick="showSection('home')">Home</a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showSection('browse')">Shop</a></li>
                     {% if current_user.is_authenticated and current_user.is_admin %}
-                    <li class="nav-item"><a class="nav-link" onclick="showSection('admin')">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" id="admin-link" onclick="showSection('admin')">Admin</a></li>
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav" id="auth-nav">
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="user-icon">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <span>{{ current_user.username }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="bi bi-gear"></i> Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-                        </ul>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('upload')">Upload</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('settings')"><i class="bi bi-gear"></i> Settings</a></li>
+                    <li class="nav-item">
+                        <div class="user-icon" onclick="logout()" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -970,11 +964,19 @@
 
         function showSection(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            const section = document.getElementById(id);
+            if (section) section.classList.add('active');
+            
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            if (id === 'home') document.querySelector('.nav-link[onclick*="home"]').classList.add('active');
-            if (id === 'browse') document.querySelector('.nav-link[onclick*="browse"]').classList.add('active');
-            renderNav();
+            
+            // Find nav link by onclick or ID
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => {
+                if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(`'${id}'`)) {
+                    link.classList.add('active');
+                }
+            });
+
             if (id === 'home') renderHome();
             if (id === 'browse') renderBrowse();
             if (id === 'admin') renderAdmin();
@@ -987,33 +989,8 @@
         }
 
         function renderNav() {
-            const nav = document.getElementById('auth-nav');
-            const adminLink = document.getElementById('admin-link');
-            if (currentUser) {
-                if (adminLink) adminLink.style.display = currentUser.isAdmin ? 'block' : 'none';
-                if (nav) {
-                    nav.innerHTML = `
-                        <li class="nav-item"><a class="nav-link" onclick="showSection('upload')">Upload</a></li>
-                        <li class="nav-item"><a class="nav-link" onclick="showSection('settings')"><i class="bi bi-gear"></i> Settings</a></li>
-                        <li class="nav-item">
-                            <div class="user-icon" onclick="logout()" title="Logout">
-                                <i class="bi bi-box-arrow-right"></i>
-                            </div>
-                        </li>
-                    `;
-                }
-            } else {
-                if (adminLink) adminLink.style.display = 'none';
-                if (nav) {
-                    nav.innerHTML = `
-                        <li class="nav-item">
-                            <div class="user-icon" onclick="showSection('login')" title="Login">
-                                <i class="bi bi-person"></i>
-                            </div>
-                        </li>
-                    `;
-                }
-            }
+            // Function no longer needed as nav is rendered server-side with Jinja
+            // to avoid JS conflicts and double-rendering issues.
         }
 
         function renderHome() {
@@ -1175,9 +1152,7 @@
         }
 
         function logout() {
-            currentUser = null;
-            sessionStorage.removeItem('user');
-            showSection('home');
+            window.location.href = "{{ url_for('logout') }}";
         }
 
         function postComment(id) {
