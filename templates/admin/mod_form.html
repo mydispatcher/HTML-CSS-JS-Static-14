@@ -8,7 +8,7 @@
         <div class="col-lg-8">
             <div class="card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="bi bi-controller" style="color: var(--primary-blue);"></i> {{ title }}</h2>
+                    <h2><img src="{{ url_for('static', filename='logo.png') }}" style="height: 40px; margin-right: 10px;"> <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span> - {{ title }}</h2>
                     <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Back
                     </a>

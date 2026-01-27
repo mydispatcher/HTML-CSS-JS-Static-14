@@ -570,7 +570,7 @@
                             <div class="stat-icon blue">
                                 <i class="bi bi-box-seam"></i>
                             </div>
-                            <div class="stat-number blue">{{ latest_mods|length if latest_mods else 0 }}</div>
+                            <div class="stat-number blue counter" data-target="{{ latest_mods|length if latest_mods else 0 }}">0</div>
                             <div class="text-secondary">Total Mods</div>
                         </div>
                     </div>
@@ -579,7 +579,7 @@
                             <div class="stat-icon red">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <div class="stat-number red">{{ total_users if total_users else 0 }}</div>
+                            <div class="stat-number red counter" data-target="{{ total_users if total_users else 0 }}">0</div>
                             <div class="text-secondary">Active Users</div>
                         </div>
                     </div>
@@ -588,13 +588,44 @@
                             <div class="stat-icon green">
                                 <i class="bi bi-download"></i>
                             </div>
-                            <div class="stat-number green">{% set total_dl = 0 %}{% for m in featured_mods %}{% set total_dl = total_dl + m.download_count %}{% endfor %}{{ total_dl }}</div>
+                            <div class="stat-number green counter" data-target="{% set total_dl = 0 %}{% for m in featured_mods %}{% set total_dl = total_dl + m.download_count %}{% endfor %}{{ total_dl }}">0</div>
                             <div class="text-secondary">Total Downloads</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 200;
+
+            const animate = (counter) => {
+                const value = +counter.getAttribute('data-target');
+                const data = +counter.innerText;
+                const time = value / speed;
+
+                if (data < value) {
+                    counter.innerText = Math.ceil(data + time);
+                    setTimeout(() => animate(counter), 1);
+                } else {
+                    counter.innerText = value;
+                }
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animate(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 1 });
+
+            counters.forEach(counter => observer.observe(counter));
+        });
+    </script>
 
         <div class="featured-section" id="featured">
             <div class="container">
