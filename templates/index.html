@@ -682,6 +682,96 @@
         </div>
     </section>
 
+    <!-- ADMIN SECTION -->
+    <section id="admin" class="app-section">
+        <div class="container py-5" style="padding-top: 8rem !important;">
+            <div class="row justify-content-center">
+                <div class="col-md-8 card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">
+                            <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 40px; margin-right: 10px;">
+                            <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span> - Admin Dashboard
+                        </h2>
+                    </div>
+                    
+                    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="mods-tab" data-bs-toggle="tab" data-bs-target="#mods-list" type="button">Mods</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#mod-upload" type="button">Publish New Mod</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="adminTabContent">
+                        <div class="tab-pane fade show active" id="mods-list">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Category</th>
+                                            <th>Downloads</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-mods-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="mod-upload">
+                            <form onsubmit="handlePublishMod(event)" id="publish-mod-form">
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Title *</label>
+                                        <input type="text" id="mod-title" class="form-control" required placeholder="Mod Title">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Version</label>
+                                        <input type="text" id="mod-version" class="form-control" placeholder="1.0.0">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Description *</label>
+                                        <textarea id="mod-desc" class="form-control" rows="4" required placeholder="Describe your mod..."></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Category</label>
+                                        <select id="mod-category" class="form-select"></select>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="mod-featured">
+                                            <label class="form-check-label" for="mod-featured">Featured Mod</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr class="my-4 border-secondary">
+                                    
+                                    <div class="col-12">
+                                        <label class="form-label">Mod File (ZIP/RAR) *</label>
+                                        <input type="file" id="mod-file-input" class="form-control" accept=".zip,.rar,.7z" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Cover Image *</label>
+                                        <input type="file" id="mod-image-input" class="form-control" accept="image/*" required>
+                                    </div>
+                                    <div class="col-12 mb-4">
+                                        <label class="form-label">Video Preview (Optional)</label>
+                                        <input type="file" id="mod-video-input" class="form-control" accept="video/*">
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Publish Mod</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- MOD DETAIL SECTION -->
     <section id="mod-detail" class="app-section">
         <div class="container py-5" id="detail-content" style="padding-top: 8rem !important;"></div>
