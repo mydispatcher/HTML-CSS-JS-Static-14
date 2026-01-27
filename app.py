@@ -69,9 +69,15 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='comments')
 
+from replit_auth import make_replit_blueprint, logged_in
+app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))
+    except (ValueError, TypeError):
+        return User.query.get(user_id)
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -193,15 +199,26 @@ def mod_detail(mod_id):
     form = CommentForm()
     
     if form.validate_on_submit() and current_user.is_authenticated:
+        content = form.content.data.strip()
+        if not content:
+            return jsonify({'success': False, 'message': 'Comment cannot be empty'}), 400
+        
         comment = Comment(
-            content=form.content.data,
+            content=content,
             user_id=current_user.id,
             mod_id=mod.id
         )
         db.session.add(comment)
         db.session.commit()
-        flash('Comment added successfully!', 'success')
-        return redirect(url_for('mod_detail', mod_id=mod_id))
+        return jsonify({
+            'success': True,
+            'comment': {
+                'id': comment.id,
+                'content': comment.content,
+                'username': current_user.username,
+                'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M')
+            }
+        })
     
     related_mods = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
     return render_template('mod_detail.html', mod=mod, related_mods=related_mods, form=form)

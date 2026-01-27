@@ -30,6 +30,11 @@
                     <button type="submit" class="btn btn-primary w-100 mb-3">
                         <i class="bi bi-box-arrow-in-right"></i> Login
                     </button>
+                    <div class="mt-2 mb-3">
+                        <a href="{{ url_for('replit_auth.login') }}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-google"></i> Sign in with Google
+                        </a>
+                    </div>
                 </form>
                 <p class="text-center text-secondary mb-0">
                     Don't have an account? <a href="{{ url_for('register') }}" style="color: var(--primary-blue);">Register</a>

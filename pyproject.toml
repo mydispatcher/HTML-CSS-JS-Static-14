@@ -6,9 +6,13 @@ requires-python = ">=3.11"
 dependencies = [
     "email-validator>=2.3.0",
     "flask>=3.1.2",
+    "flask-dance>=7.1.0",
     "flask-login>=0.6.3",
     "flask-sqlalchemy>=3.1.1",
     "flask-wtf>=1.2.2",
+    "oauthlib>=3.3.1",
     "psycopg2-binary>=2.9.11",
+    "pyjwt>=2.10.1",
     "werkzeug>=3.1.5",
+    "wtforms>=3.2.1",
 ]
