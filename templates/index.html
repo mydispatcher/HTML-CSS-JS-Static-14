@@ -181,6 +181,40 @@
         }, 1000);
     }
 
+    // Settings form handler
+    async function handleSettings(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+        }
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error saving settings');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while saving settings.');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Changes';
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         db.init();
         if (document.getElementById('countdown')) {
