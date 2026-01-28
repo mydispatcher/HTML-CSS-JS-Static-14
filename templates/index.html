@@ -75,3 +75,53 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    // Database and State Management
+    const db = {
+        get: (key) => JSON.parse(localStorage.getItem('md_' + key)) || [],
+        set: (key, val) => localStorage.setItem('md_' + key, JSON.stringify(val)),
+        init: () => {
+            if (!db.get('mods').length) {
+                db.set('mods', [
+                    { id: 1, title: 'Dispatch Audio', desc: 'Realistic police radio chatter.', version: '1.0', downloads: 540, category: 'scripts' },
+                    { id: 2, title: 'SAHP EUP', desc: 'Complete uniform pack for SAHP.', version: '2.0', downloads: 320, category: 'eup' }
+                ]);
+            }
+        }
+    };
+
+    // UI Logic
+    function showSection(id) {
+        // Handle navbar visibility logic
+        const navbar = document.querySelector('.navbar');
+        const sectionsWithHiddenTopbar = ['upload', 'admin']; 
+
+        if (navbar) {
+            if (sectionsWithHiddenTopbar.includes(id)) {
+                navbar.style.display = 'none';
+            } else {
+                navbar.style.display = 'flex';
+            }
+        }
+
+        // Section switching logic
+        document.querySelectorAll('.app-section').forEach(s => {
+            if (s.id === id) {
+                s.style.display = 'block';
+            } else {
+                s.style.display = 'none';
+            }
+        });
+
+        window.scrollTo(0, 0);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        db.init();
+        // The page usually defaults to showing the hero section if it's there
+    });
+</script>
+{% endblock %}
