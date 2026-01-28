@@ -577,7 +577,7 @@
                     The ultimate source for high-quality dispatch systems, EUP packs, and scripts for your FiveM server.
                 </p>
                 <div class="d-flex gap-3 justify-content-center mt-4">
-                    <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg">
+                    <a href="#" onclick="showSection('browse'); return false;" class="btn btn-primary btn-lg">
                         Browse Shop <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
@@ -592,7 +592,7 @@
                             <div class="stat-icon blue">
                                 <i class="bi bi-box-seam"></i>
                             </div>
-                            <div class="stat-number blue counter" id="stat-mods-count" data-target="{{ latest_mods|length if latest_mods else 0 }}">0</div>
+                            <div class="stat-number blue counter" id="stat-mods" data-target="{{ mods|length if mods else 0 }}">0</div>
                             <div class="text-secondary">Total Mods</div>
                         </div>
                     </div>
@@ -601,7 +601,7 @@
                             <div class="stat-icon red">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <div class="stat-number red counter" data-target="{{ total_users if total_users else 0 }}">0</div>
+                            <div class="stat-number red counter" id="stat-users" data-target="{{ total_users if total_users else 0 }}">0</div>
                             <div class="text-secondary">Active Users</div>
                         </div>
                     </div>
@@ -610,13 +610,38 @@
                             <div class="stat-icon green">
                                 <i class="bi bi-download"></i>
                             </div>
-                            <div class="stat-number green counter" data-target="{% set total_dl = 0 %}{% for m in featured_mods %}{% set total_dl = total_dl + m.download_count %}{% endfor %}{{ total_dl }}">0</div>
+                            <div class="stat-number green counter" id="stat-downloads" data-target="{{ total_downloads if total_downloads else 0 }}">0</div>
                             <div class="text-secondary">Total Downloads</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="featured-section" id="featured">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Featured Resources</h2>
+                    <a href="#" onclick="showSection('browse'); return false;" class="view-all-link">View All Products</a>
+                </div>
+                <p class="text-secondary mb-4">Top rated mods chosen by our community</p>
+                <div class="row g-4" id="featured-mods"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BROWSE SECTION -->
+    <section id="browse" class="app-section">
+        <div class="container" style="padding-top: 8rem !important;">
+            <div class="section-header">
+                <h1 class="section-title">Browse <span class="highlight">Mods</span></h1>
+                <div class="d-flex gap-3">
+                    <input type="text" id="search-input" class="form-control" placeholder="Search mods..." onkeyup="renderBrowse()" style="max-width: 300px;">
+                </div>
+            </div>
+            <div class="row g-4 mt-2" id="browse-list"></div>
+        </div>
+    </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -998,12 +1023,17 @@
             const users = db.get('users');
             const totalDownloads = mods.reduce((sum, m) => sum + m.downloads, 0);
             
-            document.getElementById('stat-mods').textContent = mods.length;
-            document.getElementById('stat-users').textContent = users.length;
-            document.getElementById('stat-downloads').textContent = totalDownloads;
+            const modStat = document.getElementById('stat-mods');
+            const userStat = document.getElementById('stat-users');
+            const dlStat = document.getElementById('stat-downloads');
+
+            if (modStat) modStat.textContent = mods.length;
+            if (userStat) userStat.textContent = users.length;
+            if (dlStat) dlStat.textContent = totalDownloads;
 
             const featured = mods.slice(0, 3);
-            document.getElementById('featured-mods').innerHTML = featured.map(m => renderFeaturedCard(m)).join('');
+            const featuredList = document.getElementById('featured-mods');
+            if (featuredList) featuredList.innerHTML = featured.map(m => renderFeaturedCard(m)).join('');
         }
 
         function renderFeaturedCard(m) {
