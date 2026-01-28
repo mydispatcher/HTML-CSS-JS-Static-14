@@ -15,6 +15,7 @@
             <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg">Browse Shop</a>
         </div>
     </div>
+
     <div class="container mt-5">
         <div class="row g-4 text-center">
             <div class="col-md-4">
@@ -42,6 +43,7 @@
                 </div>
             </div>
         </div>
+
         <h2 class="mt-5 mb-4 section-title">Featured <span>Resources</span></h2>
         <div class="row g-4">
             {% for mod in featured_mods %}
@@ -77,7 +79,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block extra_js %}
 {% endblock %}
