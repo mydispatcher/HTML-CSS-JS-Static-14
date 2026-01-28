@@ -111,6 +111,27 @@
         window.scrollTo(0, 0);
     }
 
+    // Consolidated countdown logic from download.html
+    function startDownloadTimer() {
+        let timeLeft = 5;
+        const countdownEl = document.getElementById('countdown');
+        const timerContainer = document.getElementById('timer-container');
+        const downloadReady = document.getElementById('download-ready');
+        
+        if (!countdownEl) return;
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            countdownEl.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                if (timerContainer) timerContainer.style.display = 'none';
+                if (downloadReady) downloadReady.style.display = 'block';
+            }
+        }, 1000);
+    }
+
     // Consolidated submitComment function from mod_detail.html
     async function submitComment(event) {
         event.preventDefault();
@@ -158,27 +179,6 @@
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
-    }
-
-    // Consolidated countdown logic from download.html
-    function startDownloadTimer() {
-        let timeLeft = 5;
-        const countdownEl = document.getElementById('countdown');
-        const timerContainer = document.getElementById('timer-container');
-        const downloadReady = document.getElementById('download-ready');
-        
-        if (!countdownEl) return;
-
-        const timer = setInterval(() => {
-            timeLeft--;
-            countdownEl.textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                if (timerContainer) timerContainer.style.display = 'none';
-                if (downloadReady) downloadReady.style.display = 'block';
-            }
-        }, 1000);
     }
 
     // Settings form handler
