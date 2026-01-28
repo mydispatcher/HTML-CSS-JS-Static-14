@@ -131,23 +131,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    let timeLeft = 5;
-    const countdownEl = document.getElementById('countdown');
-    const timerContainer = document.getElementById('timer-container');
-    const downloadReady = document.getElementById('download-ready');
-    
-    const timer = setInterval(() => {
-        timeLeft--;
-        countdownEl.textContent = timeLeft;
-        
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            timerContainer.style.display = 'none';
-            downloadReady.style.display = 'block';
-        }
-    }, 1000);
-</script>
-{% endblock %}

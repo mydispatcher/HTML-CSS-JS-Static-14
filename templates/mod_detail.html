@@ -98,55 +98,6 @@
                             <i class="bi bi-send"></i> Post Comment
                         </button>
                     </form>
-
-                    <script>
-                    async function submitComment(event) {
-                        event.preventDefault();
-                        const form = event.target;
-                        const content = document.getElementById('comment-content').value.trim();
-                        
-                        if (!content) {
-                            alert('Comment cannot be empty');
-                            return;
-                        }
-
-                        const submitBtn = form.querySelector('button[type="submit"]');
-                        if (submitBtn.disabled) return;
-                        
-                        submitBtn.disabled = true;
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Posting...';
-
-                        try {
-                            const formData = new FormData(form);
-                            const response = await fetch(window.location.href, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            });
-
-                            if (response.ok) {
-                                const result = await response.json();
-                                if (result.success) {
-                                    location.reload();
-                                } else {
-                                    alert(result.message || 'Error posting comment');
-                                }
-                            } else {
-                                const errorData = await response.json();
-                                alert(errorData.message || 'Error posting comment');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('An error occurred while posting your comment.');
-                        } finally {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalText;
-                        }
-                    }
-                    </script>
                     {% else %}
                     <div class="alert alert-info mb-4" style="background: rgba(0, 102, 255, 0.1); border-color: var(--primary-blue); color: var(--text-primary);">
                         <i class="bi bi-info-circle"></i> <a href="{{ url_for('login') }}" style="color: var(--primary-blue);">Login</a> to post a comment
