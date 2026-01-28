@@ -35,13 +35,15 @@
         }
 
         .navbar {
-            background: transparent;
-            padding: 1.25rem 0;
-            position: absolute;
+            background: rgba(12, 12, 20, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .navbar-brand {
@@ -54,20 +56,6 @@
             text-decoration: none;
         }
 
-        .navbar-brand .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--primary-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .navbar-brand span {
-            color: var(--text-secondary);
-        }
-
         .nav-link {
             color: var(--text-secondary) !important;
             font-weight: 500;
@@ -75,7 +63,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: color 0.3s ease;
-            margin: 0 1rem;
+            margin: 0 0.5rem;
             text-decoration: none;
             cursor: pointer;
         }
@@ -98,7 +86,7 @@
         }
 
         .hero-section {
-            padding: 10rem 0 6rem;
+            padding: 12rem 0 6rem;
             position: relative;
             min-height: 600px;
         }
@@ -118,23 +106,21 @@
         }
 
         .hero-title {
-            font-size: 4rem;
+            font-size: 5rem;
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 1.5rem;
             text-transform: uppercase;
-        }
-
-        .hero-title .highlight {
-            color: var(--primary-blue);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
         }
 
         .hero-subtitle {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 500px;
+            font-size: 1.5rem;
+            max-width: 700px;
             margin-bottom: 2rem;
             line-height: 1.6;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
         }
 
         .btn-primary-custom {
@@ -231,15 +217,8 @@
             text-transform: uppercase;
         }
 
-        .view-all-link {
+        .highlight {
             color: var(--primary-blue);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .view-all-link:hover {
-            text-decoration: underline;
         }
 
         .product-card {
@@ -284,25 +263,11 @@
             text-transform: uppercase;
         }
 
-        .category-badge.scripts {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--primary-blue);
-        }
+        .category-badge.scripts { background: rgba(59, 130, 246, 0.2); color: var(--primary-blue); }
+        .category-badge.eup { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+        .category-badge.maps { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
 
-        .category-badge.eup {
-            background: rgba(234, 179, 8, 0.2);
-            color: #eab308;
-        }
-
-        .category-badge.maps {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--accent-red);
-        }
-
-        .product-body {
-            padding: 1.25rem;
-        }
-
+        .product-body { padding: 1.25rem; }
         .product-title {
             font-size: 0.9rem;
             font-weight: 600;
@@ -311,125 +276,30 @@
             justify-content: space-between;
             align-items: center;
         }
+        .product-title .price { color: var(--accent-green); font-weight: 700; }
+        .product-desc { color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1rem; line-height: 1.5; }
+        .product-actions { display: flex; gap: 0.75rem; }
 
-        .product-title .price {
-            color: var(--accent-green);
-            font-weight: 700;
-        }
-
-        .product-desc {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .btn-details {
+        .btn-details, .btn-get-mod {
             flex: 1;
-            background: var(--bg-card-hover);
-            border: 1px solid var(--border-color);
             padding: 0.625rem 1rem;
             border-radius: 6px;
-            color: var(--text-primary);
             font-size: 0.8rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
-        }
-
-        .btn-details:hover {
-            border-color: var(--primary-blue);
-        }
-
-        .btn-get-mod {
-            flex: 1;
-            background: transparent;
-            border: 1px solid var(--accent-green);
-            padding: 0.625rem 1rem;
-            border-radius: 6px;
-            color: var(--accent-green);
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-get-mod:hover {
-            background: var(--accent-green);
-            color: white;
-        }
-
-        footer {
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-color);
-            padding: 4rem 0 2rem;
-            margin-top: 4rem;
-        }
-
-        .footer-brand {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .footer-brand span {
-            color: var(--text-secondary);
-        }
-
-        .footer-text {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.6;
-            max-width: 300px;
-        }
-
-        .footer-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 1.25rem;
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.75rem;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.875rem;
-            transition: color 0.3s ease;
         }
 
-        .footer-links a:hover {
-            color: var(--primary-blue);
-        }
+        .btn-details { background: var(--bg-card-hover); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .btn-details:hover { border-color: var(--primary-blue); }
 
-        .app-section {
-            display: none;
-        }
+        .btn-get-mod { background: transparent; border: 1px solid var(--accent-green); color: var(--accent-green); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-get-mod:hover { background: var(--accent-green); color: white; }
 
-        .app-section.active {
-            display: block;
-        }
+        .app-section { display: none; }
+        .app-section.active { display: block; }
 
         .form-control {
             background-color: var(--bg-card);
@@ -445,56 +315,13 @@
             box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
         }
 
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-        }
+        .card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
 
-        .browse-card {
+        footer {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .browse-card:hover {
-            border-color: var(--primary-blue);
-            transform: translateY(-4px);
-        }
-
-        .browse-card .mod-placeholder {
-            height: 180px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .browse-card .mod-placeholder i {
-            font-size: 3rem;
-            color: var(--primary-blue);
-        }
-
-        .browse-card .card-body {
-            padding: 1.25rem;
-        }
-
-        .comment-item {
-            background: var(--bg-card-hover);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .download-timer {
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--primary-blue);
-            margin: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 0 2rem;
+            margin-top: 4rem;
         }
 
         .firewall-overlay {
@@ -538,10 +365,10 @@
                     <li class="nav-item"><a class="nav-link active" onclick="showSection('home')">Home</a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showSection('browse')">Shop</a></li>
                     {% if current_user.is_authenticated and current_user.is_admin %}
-                    <li class="nav-item"><a class="nav-link" id="admin-link" onclick="showSection('admin')">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showSection('admin')">Admin</a></li>
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav" id="auth-nav">
+                <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" onclick="showSection('upload')">Upload</a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showSection('settings')"><i class="bi bi-gear"></i> Settings</a></li>
@@ -563,21 +390,21 @@
         </div>
     </nav>
 
-    <div id="flash-messages" class="container mt-3"></div>
+    <div id="flash-messages" class="container mt-3" style="padding-top: 5rem;"></div>
 
     <!-- HOME SECTION -->
     <section id="home" class="app-section active">
         <div class="hero-section" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ url_for('static', filename='banner.webp') }}'); background-size: cover; background-position: center;">
             <div class="container text-center">
                 <div class="premium-badge">Premium GTA V Mods</div>
-                <h1 class="hero-title" style="font-size: 5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                <h1 class="hero-title">
                     <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
                 </h1>
-                <p class="hero-subtitle mx-auto" style="font-size: 1.5rem; text-shadow: 1px 1px 5px rgba(0,0,0,0.8);">
+                <p class="hero-subtitle mx-auto">
                     The ultimate source for high-quality dispatch systems, EUP packs, and scripts for your FiveM server.
                 </p>
                 <div class="d-flex gap-3 justify-content-center mt-4">
-                    <a href="#" onclick="showSection('browse'); return false;" class="btn btn-primary btn-lg">
+                    <a onclick="showSection('browse')" class="btn btn-primary-custom btn-lg">
                         Browse Shop <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
@@ -589,28 +416,22 @@
                 <div class="row g-4 text-center">
                     <div class="col-md-4">
                         <div class="stat-card">
-                            <div class="stat-icon blue">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <div class="stat-number blue counter" id="stat-mods" data-target="{{ mods|length if mods else 0 }}">0</div>
+                            <div class="stat-icon blue"><i class="bi bi-box-seam"></i></div>
+                            <div class="stat-number blue counter" id="stat-mods" data-target="3">0</div>
                             <div class="text-secondary">Total Mods</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stat-card">
-                            <div class="stat-icon red">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <div class="stat-number red counter" id="stat-users" data-target="{{ total_users if total_users else 0 }}">0</div>
+                            <div class="stat-icon red"><i class="bi bi-people"></i></div>
+                            <div class="stat-number red counter" id="stat-users" data-target="1">0</div>
                             <div class="text-secondary">Active Users</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stat-card">
-                            <div class="stat-icon green">
-                                <i class="bi bi-download"></i>
-                            </div>
-                            <div class="stat-number green counter" id="stat-downloads" data-target="{{ total_downloads if total_downloads else 0 }}">0</div>
+                            <div class="stat-icon green"><i class="bi bi-download"></i></div>
+                            <div class="stat-number green counter" id="stat-downloads" data-target="1040">0</div>
                             <div class="text-secondary">Total Downloads</div>
                         </div>
                     </div>
@@ -622,7 +443,7 @@
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Featured Resources</h2>
-                    <a href="#" onclick="showSection('browse'); return false;" class="view-all-link">View All Products</a>
+                    <a onclick="showSection('browse')" class="view-all-link" style="color: var(--primary-blue); cursor: pointer; text-decoration: none;">View All Products</a>
                 </div>
                 <p class="text-secondary mb-4">Top rated mods chosen by our community</p>
                 <div class="row g-4" id="featured-mods"></div>
@@ -643,237 +464,9 @@
         </div>
     </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const counters = document.querySelectorAll('.counter');
-            const speed = 200;
-
-            const animate = (counter) => {
-                const value = +counter.getAttribute('data-target');
-                const data = +counter.innerText;
-                const time = value / speed;
-
-                if (data < value) {
-                    counter.innerText = Math.ceil(data + time);
-                    setTimeout(() => animate(counter), 1);
-                } else {
-                    counter.innerText = value;
-                }
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        animate(entry.target);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 1 });
-
-            counters.forEach(counter => observer.observe(counter));
-        });
-    </script>
-
-        <div class="featured-section" id="featured">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Featured Resources</h2>
-                    <a href="#" onclick="showSection('browse'); return false;" class="view-all-link">View All Products</a>
-                </div>
-                <p class="text-secondary mb-4">Top rated mods chosen by our community</p>
-                <div class="row g-4" id="featured-mods"></div>
-            </div>
-        </div>
-
-        <footer>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="footer-brand">
-                            <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 30px; margin-right: 10px;">
-                            <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
-                        </div>
-                        <p class="footer-text">
-                            Providing high-quality resources for the FiveM community. Enhance your server with our premium dispatch systems and modifications.
-                        </p>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <h5 class="footer-title">Resources</h5>
-                        <ul class="footer-links">
-                            <li><a href="#" onclick="showSection('browse'); return false;">All Mods</a></li>
-                            <li><a href="#">Vehicles</a></li>
-                            <li><a href="#">Scripts</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <h5 class="footer-title">Support</h5>
-                        <ul class="footer-links">
-                            <li><a href="#">Discord</a></li>
-                            <li><a href="#">Documentation</a></li>
-                            <li><a href="#">Terms of Service</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </section>
-
-    <!-- BROWSE SECTION -->
-    <section id="browse" class="app-section">
-        <div class="container py-5" style="padding-top: 8rem !important;">
-            <h1 class="section-title mb-4">Browse <span class="highlight">Mods</span></h1>
-            <div class="row mb-4">
-                <div class="col-md-8">
-                    <input type="text" id="search-input" class="form-control" placeholder="Search mods..." oninput="renderBrowse()">
-                </div>
-            </div>
-            <div class="row g-4" id="browse-list"></div>
-        </div>
-    </section>
-
-    <!-- ADMIN SECTION -->
-    <section id="admin" class="app-section">
-        <div class="container py-5" style="padding-top: 8rem !important;">
-            <div class="row justify-content-center">
-                <div class="col-md-8 card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="mb-0">
-                            <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 40px; margin-right: 10px;">
-                            <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span> - Admin Dashboard
-                        </h2>
-                    </div>
-                    
-                    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" id="mods-tab" data-bs-toggle="tab" data-bs-target="#mods-list" type="button">Mods</button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#mod-upload" type="button">Publish New Mod</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="adminTabContent">
-                        <div class="tab-pane fade show active" id="mods-list">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Title</th>
-                                            <th>Category</th>
-                                            <th>Downloads</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="admin-mods-table"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="mod-upload">
-                            <form onsubmit="handlePublishMod(event)" id="publish-mod-form">
-                                <div class="row g-3">
-                                    <div class="col-md-8">
-                                        <label class="form-label">Title *</label>
-                                        <input type="text" id="mod-title" class="form-control" required placeholder="Mod Title">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Version</label>
-                                        <input type="text" id="mod-version" class="form-control" placeholder="1.0.0">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">Description *</label>
-                                        <textarea id="mod-desc" class="form-control" rows="4" required placeholder="Describe your mod..."></textarea>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Category</label>
-                                        <select id="mod-category" class="form-select"></select>
-                                    </div>
-                                    <div class="col-md-6 d-flex align-items-end">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="mod-featured">
-                                            <label class="form-check-label" for="mod-featured">Featured Mod</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <hr class="my-4 border-secondary">
-                                    
-                                    <div class="col-12" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                                        <label class="form-label">Mod File (ZIP/RAR) *</label>
-                                        <input type="file" id="mod-file-input" class="form-control" accept=".zip,.rar,.7z" required>
-                                    </div>
-                                    <div class="col-12" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                                        <label class="form-label">Cover Image *</label>
-                                        <input type="file" id="mod-image-input" class="form-control" accept="image/*" required>
-                                    </div>
-                                    <div class="col-12 mb-4" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-                                        <label class="form-label">Video Preview (Optional)</label>
-                                        <input type="file" id="mod-video-input" class="form-control" accept="video/*">
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Publish Mod</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- MOD DETAIL SECTION -->
     <section id="mod-detail" class="app-section">
         <div class="container py-5" id="detail-content" style="padding-top: 8rem !important;"></div>
-    </section>
-
-    <!-- DOWNLOAD SECTION -->
-    <section id="download" class="app-section">
-        <div class="container py-5 text-center" style="padding-top: 8rem !important;">
-            <div class="card p-5 mx-auto" style="max-width: 600px;">
-                <h2>Preparing Download</h2>
-                <p class="text-secondary">Your file is being unlocked for secure transfer.</p>
-                <div id="timer" class="download-timer">5</div>
-                <div id="dl-actions">
-                    <button class="btn btn-secondary btn-lg w-100" disabled id="dl-btn">
-                        <i class="bi bi-lock-fill"></i> Locked
-                    </button>
-                </div>
-                <p class="mt-4 small text-secondary">Do not close this page until the timer expires.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- LOGIN SECTION -->
-    <section id="login" class="app-section">
-        <div class="container py-5" style="padding-top: 8rem !important;">
-            <div class="row justify-content-center">
-                <div class="col-md-4 card p-4">
-                    <h2 class="text-center mb-4">Login</h2>
-                    <form onsubmit="handleLogin(event)">
-                        <input type="email" id="login-email" class="form-control mb-3" placeholder="Email" required>
-                        <input type="password" id="login-pass" class="form-control mb-4" placeholder="Password" required>
-                        <button type="submit" class="btn-primary-custom w-100">Login</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- REGISTER SECTION -->
-    <section id="register" class="app-section">
-        <div class="container py-5" style="padding-top: 8rem !important;">
-            <div class="row justify-content-center">
-                <div class="col-md-4 card p-4">
-                    <h2 class="text-center mb-4">Register</h2>
-                    <form onsubmit="handleRegister(event)">
-                        <input type="text" id="reg-user" class="form-control mb-3" placeholder="Username" required>
-                        <input type="email" id="reg-email" class="form-control mb-3" placeholder="Email" required>
-                        <input type="password" id="reg-pass" class="form-control mb-4" placeholder="Password" required>
-                        <button type="submit" class="btn-primary-custom w-100">Create Account</button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </section>
 
     <!-- UPLOAD SECTION -->
@@ -909,29 +502,11 @@
                         <span>Publish New Mod</span>
                     </button>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h3>Total Mods</h3>
-                        <div class="stat-number blue" id="admin-mods">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h3>Total Users</h3>
-                        <div class="stat-number red" id="admin-users">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h3>Total Downloads</h3>
-                        <div class="stat-number green" id="admin-downloads">0</div>
-                    </div>
-                </div>
+                <div class="col-md-3"><div class="stat-card"><h3>Mods</h3><div class="stat-number blue" id="admin-mods">0</div></div></div>
+                <div class="col-md-3"><div class="stat-card"><h3>Users</h3><div class="stat-number red" id="admin-users">0</div></div></div>
+                <div class="col-md-3"><div class="stat-card"><h3>Downloads</h3><div class="stat-number green" id="admin-downloads">0</div></div></div>
             </div>
-            <div class="mt-5">
-                <h3 class="mb-3">All Mods</h3>
-                <div id="admin-mod-list"></div>
-            </div>
+            <div class="mt-5"><h3 class="mb-3">Manage Mods</h3><div id="admin-mod-list"></div></div>
         </div>
     </section>
 
@@ -953,6 +528,50 @@
         </div>
     </section>
 
+    <!-- DOWNLOAD SECTION -->
+    <section id="download" class="app-section">
+        <div class="container py-5 text-center" style="padding-top: 8rem !important;">
+            <div class="card p-5 mx-auto" style="max-width: 600px;">
+                <h2>Preparing Download</h2>
+                <p class="text-secondary">Your file is being unlocked for secure transfer.</p>
+                <div id="timer" class="download-timer">5</div>
+                <div id="dl-actions">
+                    <button class="btn btn-secondary btn-lg w-100" disabled id="dl-btn">
+                        <i class="bi bi-lock-fill"></i> Locked
+                    </button>
+                </div>
+                <p class="mt-4 small text-secondary">Do not close this page until the timer expires.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="footer-brand">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="MYDISPATCHER" style="height: 30px; margin-right: 10px;">
+                        <span style="color: #0066ff;">MY</span><span style="color: #ffffff;">DISPATCHER</span>
+                    </div>
+                    <p class="footer-text">High-quality resources for the FiveM community.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">Resources</h5>
+                    <ul class="list-unstyled">
+                        <li><a onclick="showSection('browse')" style="cursor: pointer;">All Mods</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">Follow Us</h5>
+                    <div class="d-flex gap-3 fs-5">
+                        <i class="bi bi-discord"></i><i class="bi bi-youtube"></i><i class="bi bi-twitter"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const db = {
             get: (key) => JSON.parse(localStorage.getItem('md_' + key)) || [],
@@ -960,9 +579,9 @@
             init: () => {
                 if (!db.get('mods').length) {
                     db.set('mods', [
-                        { id: 1, title: 'Dispatch Audio', desc: 'Realistic police radio chatter and dispatch audio replacement. Adds immersion to your patrols.', version: '1.0', downloads: 540, category: 'scripts', comments: [] },
-                        { id: 2, title: 'SAHP EUP', desc: 'Complete uniform pack for SAHP. Includes Class A, B, and C uniforms, jackets, and hats.', version: '2.0', downloads: 320, category: 'eup', comments: [] },
-                        { id: 3, title: 'Sandy Station', desc: 'A complete overhaul of the Sandy Shores Sheriff Station. New interior, exterior lighting, and parking.', version: '1.5', downloads: 180, category: 'maps', comments: [] }
+                        { id: 1, title: 'Dispatch Audio', desc: 'Realistic police radio chatter.', version: '1.0', downloads: 540, category: 'scripts', comments: [] },
+                        { id: 2, title: 'SAHP EUP', desc: 'Complete uniform pack for SAHP.', version: '2.0', downloads: 320, category: 'eup', comments: [] },
+                        { id: 3, title: 'Sandy Station', desc: 'Overhaul of the Sandy Shores Station.', version: '1.5', downloads: 180, category: 'maps', comments: [] }
                     ]);
                 }
                 if (!db.get('users').length) {
@@ -973,19 +592,19 @@
 
         let currentUser = JSON.parse(sessionStorage.getItem('user')) || null;
 
-        const sanitize = (str) => {
+        function sanitize(str) {
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
-        };
+        }
 
-        const checkFirewall = (input) => {
+        function checkFirewall(input) {
             const pattern = /<script|javascript:|onload=|alert\(|onerror=/i;
             if (pattern.test(input)) {
                 document.getElementById('firewall').style.display = 'flex';
                 throw new Error('Blocked');
             }
-        };
+        }
 
         function showSection(id) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
@@ -993,10 +612,7 @@
             if (section) section.classList.add('active');
             
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            
-            // Find nav link by onclick or ID
-            const links = document.querySelectorAll('.nav-link');
-            links.forEach(link => {
+            document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(`'${id}'`)) {
                     link.classList.add('active');
                 }
@@ -1009,26 +625,15 @@
             window.scrollTo(0, 0);
         }
 
-        function scrollToFeatured() {
-            document.getElementById('featured').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function renderNav() {
-            // Function no longer needed as nav is rendered server-side with Jinja
-            // to avoid JS conflicts and double-rendering issues.
-        }
+        function logout() { window.location.href = "{{ url_for('logout') }}"; }
 
         function renderHome() {
             const mods = db.get('mods');
-            const users = db.get('users');
             const totalDownloads = mods.reduce((sum, m) => sum + m.downloads, 0);
             
             const modStat = document.getElementById('stat-mods');
-            const userStat = document.getElementById('stat-users');
             const dlStat = document.getElementById('stat-downloads');
-
             if (modStat) modStat.textContent = mods.length;
-            if (userStat) userStat.textContent = users.length;
             if (dlStat) dlStat.textContent = totalDownloads;
 
             const featured = mods.slice(0, 3);
@@ -1038,27 +643,19 @@
 
         function renderFeaturedCard(m) {
             const categoryClass = m.category || 'scripts';
-            const categoryLabel = (m.category || 'scripts').toUpperCase();
             return `
                 <div class="col-md-4">
                     <div class="product-card" onclick="viewMod(${m.id})">
                         <div class="product-image">
-                            <span class="category-badge ${categoryClass}">
-                                <i class="bi bi-${categoryClass === 'scripts' ? 'code-slash' : categoryClass === 'eup' ? 'person-badge' : 'map'}"></i> ${categoryLabel}
-                            </span>
+                            <span class="category-badge ${categoryClass}">${categoryClass.toUpperCase()}</span>
                             <h3>${sanitize(m.title)}</h3>
                         </div>
                         <div class="product-body">
-                            <div class="product-title">
-                                ${sanitize(m.title).toUpperCase()}
-                                <span class="price">FREE</span>
-                            </div>
-                            <p class="product-desc">${sanitize(m.desc).substring(0, 80)}${m.desc.length > 80 ? '...' : ''}</p>
+                            <div class="product-title">${sanitize(m.title).toUpperCase()} <span class="price">FREE</span></div>
+                            <p class="product-desc">${sanitize(m.desc).substring(0, 80)}...</p>
                             <div class="product-actions">
                                 <button class="btn-details" onclick="event.stopPropagation(); viewMod(${m.id})">Details</button>
-                                <button class="btn-get-mod" onclick="event.stopPropagation(); startDownload(${m.id})">
-                                    <i class="bi bi-download"></i> Get Mod
-                                </button>
+                                <button class="btn-get-mod" onclick="event.stopPropagation(); startDownload(${m.id})"><i class="bi bi-download"></i> Get</button>
                             </div>
                         </div>
                     </div>
@@ -1069,25 +666,20 @@
         function renderBrowse() {
             const q = document.getElementById('search-input').value.toLowerCase();
             const mods = db.get('mods').filter(m => m.title.toLowerCase().includes(q));
-            document.getElementById('browse-list').innerHTML = mods.map(m => renderBrowseCard(m)).join('');
-        }
-
-        function renderBrowseCard(m) {
-            return `
+            document.getElementById('browse-list').innerHTML = mods.map(m => `
                 <div class="col-md-4">
-                    <div class="browse-card" onclick="viewMod(${m.id})">
-                        <div class="mod-placeholder"><i class="bi bi-controller"></i></div>
-                        <div class="card-body">
-                            <h5 class="mb-2">${sanitize(m.title)}</h5>
-                            <p class="text-secondary small mb-2">${sanitize(m.desc).substring(0, 60)}...</p>
+                    <div class="product-card" onclick="viewMod(${m.id})">
+                        <div class="product-image"><h3>${sanitize(m.title)}</h3></div>
+                        <div class="product-body">
+                            <h5>${sanitize(m.title)}</h5>
+                            <p class="text-secondary small">${sanitize(m.desc).substring(0, 60)}...</p>
                             <div class="d-flex justify-content-between small text-secondary">
-                                <span>v${m.version}</span>
-                                <span><i class="bi bi-download"></i> ${m.downloads}</span>
+                                <span>v${m.version}</span><span><i class="bi bi-download"></i> ${m.downloads}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
+            `).join('');
         }
 
         function viewMod(id) {
@@ -1095,31 +687,8 @@
             const detail = document.getElementById('detail-content');
             detail.innerHTML = `
                 <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card p-4">
-                            <h1>${sanitize(mod.title)}</h1>
-                            <p class="lead text-secondary">${sanitize(mod.desc)}</p>
-                            <hr style="border-color: var(--border-color);">
-                            <h3>Comments</h3>
-                            <div id="comment-list">
-                                ${mod.comments.map(c => `<div class="comment-item"><strong>${sanitize(c.user)}:</strong> ${sanitize(c.text)}</div>`).join('')}
-                            </div>
-                            ${currentUser ? `
-                                <div class="mt-4">
-                                    <textarea id="comment-text" class="form-control mb-2" placeholder="Post a comment..."></textarea>
-                                    <button class="btn-primary-custom" onclick="postComment(${mod.id})">Post</button>
-                                </div>
-                            ` : '<p class="mt-4 text-secondary">Login to comment.</p>'}
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card p-4 text-center">
-                            <h3>Get Mod</h3>
-                            <button onclick="startDownload(${mod.id})" class="btn-primary-custom w-100">
-                                <i class="bi bi-download"></i> Download
-                            </button>
-                        </div>
-                    </div>
+                    <div class="col-lg-8"><div class="card p-4"><h1>${sanitize(mod.title)}</h1><p>${sanitize(mod.desc)}</p></div></div>
+                    <div class="col-lg-4"><div class="card p-4 text-center"><h3>Get Mod</h3><button onclick="startDownload(${mod.id})" class="btn-primary-custom w-100">Download</button></div></div>
                 </div>
             `;
             showSection('mod-detail');
@@ -1127,106 +696,17 @@
 
         function renderAdmin() {
             const mods = db.get('mods');
-            const users = db.get('users');
-            const totalDownloads = mods.reduce((sum, m) => sum + m.downloads, 0);
-
             document.getElementById('admin-mods').textContent = mods.length;
-            document.getElementById('admin-users').textContent = users.length;
-            document.getElementById('admin-downloads').textContent = totalDownloads;
-
             document.getElementById('admin-mod-list').innerHTML = mods.map(m => `
-                <div class="card p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${sanitize(m.title)}</strong>
-                            <span class="text-secondary ms-2">v${m.version}</span>
-                        </div>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMod(${m.id})">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                    </div>
+                <div class="card p-3 mb-3 d-flex justify-content-between flex-row align-items-center">
+                    <div><strong>${sanitize(m.title)}</strong></div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMod(${m.id})">Delete</button>
                 </div>
             `).join('');
         }
 
-        function renderSettings() {
-            if (currentUser) {
-                document.getElementById('set-user').value = currentUser.user;
-            }
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const users = db.get('users');
-            const user = users.find(u => u.email === email && u.pass === pass);
-            if (user) {
-                currentUser = user;
-                sessionStorage.setItem('user', JSON.stringify(user));
-                showSection('home');
-            } else alert('Invalid credentials');
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const u = document.getElementById('reg-user').value;
-            const e_ = document.getElementById('reg-email').value;
-            const p = document.getElementById('reg-pass').value;
-            checkFirewall(u);
-            const users = db.get('users');
-            users.push({ email: e_, pass: p, user: u, isAdmin: false });
-            db.set('users', users);
-            alert('Registered!');
-            showSection('login');
-        }
-
-        function logout() {
-            window.location.href = "{{ url_for('logout') }}";
-        }
-
-        function postComment(id) {
-            const text = document.getElementById('comment-text').value;
-            checkFirewall(text);
-            const mods = db.get('mods');
-            const mod = mods.find(m => m.id === id);
-            mod.comments.push({ user: currentUser.user, text: text });
-            db.set('mods', mods);
-            viewMod(id);
-        }
-
-        function handleUpload(e) {
-            e.preventDefault();
-            const title = document.getElementById('up-title').value;
-            const desc = document.getElementById('up-desc').value;
-            const category = document.getElementById('up-category').value;
-            const ver = document.getElementById('up-version').value;
-            checkFirewall(title + desc + ver);
-            const mods = db.get('mods');
-            mods.push({ id: Date.now(), title, desc, category, version: ver, downloads: 0, comments: [] });
-            db.set('mods', mods);
-            alert('Mod Published!');
-            showSection('browse');
-        }
-
-        function handleSettings(e) {
-            e.preventDefault();
-            const newUser = document.getElementById('set-user').value;
-            const newPass = document.getElementById('set-pass').value;
-            const users = db.get('users');
-            const idx = users.findIndex(u => u.email === currentUser.email);
-            if (idx !== -1) {
-                users[idx].user = newUser;
-                if (newPass) users[idx].pass = newPass;
-                db.set('users', users);
-                currentUser.user = newUser;
-                sessionStorage.setItem('user', JSON.stringify(currentUser));
-                alert('Settings saved!');
-            }
-        }
-
         function deleteMod(id) {
-            if (confirm('Delete this mod?')) {
+            if (confirm('Delete?')) {
                 const mods = db.get('mods').filter(m => m.id !== id);
                 db.set('mods', mods);
                 renderAdmin();
@@ -1245,16 +725,9 @@
                     clearInterval(it);
                     timer.innerText = "READY";
                     btn.disabled = false;
-                    btn.classList.remove('btn-secondary');
-                    btn.classList.add('btn-primary-custom');
-                    btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Download File';
-                    btn.onclick = () => {
-                        const mods = db.get('mods');
-                        const mod = mods.find(m => m.id === id);
-                        mod.downloads++;
-                        db.set('mods', mods);
-                        alert('Downloading mod data packet...');
-                    };
+                    btn.classList.replace('btn-secondary', 'btn-primary-custom');
+                    btn.innerHTML = '<i class="bi bi-unlock-fill"></i> Download Now';
+                    btn.onclick = () => alert('Download starting...');
                 }
             }, 1000);
         }
