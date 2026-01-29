@@ -265,7 +265,44 @@ def admin():
     mods = Mod.query.all()
     categories = Category.query.all()
     users = User.query.all()
-    return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users)
+    stats = {
+        'total_mods': len(mods),
+        'total_users': len(users),
+        'total_downloads': sum(m.download_count for m in mods),
+        'total_categories': len(categories)
+    }
+    return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users, stats=stats)
+
+@app.route('/admin/mod/new', methods=['GET', 'POST'])
+@login_required
+def admin_new_mod():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    # Minimal implementation to satisfy routing
+    return "New Mod Form - Coming Soon"
+
+@app.route('/admin/mod/edit/<int:mod_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_mod(mod_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    return f"Edit Mod {mod_id} - Coming Soon"
+
+@app.route('/admin/mod/delete/<int:mod_id>', methods=['POST'])
+@login_required
+def admin_delete_mod(mod_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    return "Delete Mod - Coming Soon"
+
+@app.route('/admin/category/new', methods=['GET', 'POST'])
+@login_required
+def admin_new_category():
+    if not current_user.is_admin: return redirect(url_for('index'))
+    return "New Category Form - Coming Soon"
+
+@app.route('/admin/category/delete/<int:cat_id>', methods=['POST'])
+@login_required
+def admin_delete_category(cat_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    return "Delete Category - Coming Soon"
 
 @app.route('/settings')
 @login_required
