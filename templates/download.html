@@ -162,28 +162,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
-    const countdownEl = document.getElementById('countdown');
-    const timerContainer = document.getElementById('timer-container');
-    const downloadReady = document.getElementById('download-ready');
-    const downloadBtn = document.getElementById('download-btn');
-    
-    if (!countdownEl || !downloadBtn) return;
-
-    const interval = setInterval(() => {
-        timeLeft--;
-        if (countdownEl) countdownEl.textContent = timeLeft;
-        
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            if (timerContainer) timerContainer.style.display = 'none';
-            if (downloadReady) downloadReady.style.display = 'block';
-            
-            // Auto-trigger download
-            setTimeout(() => {
-                window.location.href = downloadBtn.href;
-            }, 500);
-        }
-    }, 1000);
-});
-</script>
-{% endblock %}
