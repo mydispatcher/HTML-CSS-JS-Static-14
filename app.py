@@ -51,13 +51,13 @@ def configure_database(app):
             
             if all([pg_user, pg_pass, pg_host, pg_port, pg_db]):
                 uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-                logger.info(f"Using PostgreSQL from individual environment variables")
+                logger.info("Using PostgreSQL from individual environment variables")
         
         if uri and uri.strip() and "localhost" not in uri:
             # Handle Render's postgres:// format
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
-            logger.info(f"Configuring database with remote URI")
+            logger.info("Configuring database with remote URI")
             return uri
         else:
             logger.warning("No remote DATABASE_URL found or it points to localhost. Falling back to local SQLite database.")
@@ -85,6 +85,7 @@ login_manager.login_view = 'login'
 
 # Models
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -99,12 +100,14 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 class Category(db.Model):
+    __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     mods = db.relationship('Mod', backref='category', lazy=True)
 
 class Mod(db.Model):
+    __tablename__ = 'mod'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -121,6 +124,7 @@ class Mod(db.Model):
     comments = db.relationship('Comment', backref='mod', lazy=True, order_by='Comment.created_at.desc()')
 
 class Comment(db.Model):
+    __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -174,7 +178,7 @@ def index():
         return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories)
     except Exception as e:
         logger.error(f"Index route error: {e}")
-        return "Critical system error - Please check console logs.", 500
+        return "Critical system error - Database initialization might be incomplete. Please refresh in a moment.", 500
 
 @app.route('/browse')
 def browse():
@@ -289,20 +293,26 @@ def download_file(mod_id, token):
 def init_db_safely():
     try:
         with app.app_context():
+            # Explicitly create tables
             db.create_all()
+            
             if not User.query.filter_by(email='admin@mydispatcher.com').first():
                 admin = User(username='admin', email='admin@mydispatcher.com', is_admin=True)
                 admin.set_password('admin123')
                 db.session.add(admin)
+                
             if not Category.query.first():
                 for name in ['Vehicles', 'Scripts', 'Maps', 'Weapons', 'Characters', 'Graphics']:
                     db.session.add(Category(name=name))
+                    
             db.session.commit()
-            logger.info("Database system ready.")
+            logger.info("Database system ready with all tables created.")
     except Exception as e:
         logger.error(f"FATAL: Database initialization failed: {e}")
 
+# Pre-run initialization
+init_db_safely()
+
 if __name__ == '__main__':
-    init_db_safely()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
