@@ -38,15 +38,29 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key
 # Database Connection with Safety Wrapper
 def configure_database(app):
     try:
+        # Check for DATABASE_URL first
         uri = os.environ.get('DATABASE_URL')
-        if uri and uri.strip():
+        
+        # If DATABASE_URL is missing or suspicious (like "localhost"), use individual PG variables
+        if not uri or "localhost" in uri:
+            pg_user = os.environ.get('PGUSER')
+            pg_pass = os.environ.get('PGPASSWORD')
+            pg_host = os.environ.get('PGHOST')
+            pg_port = os.environ.get('PGPORT')
+            pg_db = os.environ.get('PGDATABASE')
+            
+            if all([pg_user, pg_pass, pg_host, pg_port, pg_db]):
+                uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+                logger.info(f"Using PostgreSQL from individual environment variables")
+        
+        if uri and uri.strip() and "localhost" not in uri:
             # Handle Render's postgres:// format
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
-            logger.info(f"Using DATABASE_URL from environment")
+            logger.info(f"Configuring database with remote URI")
             return uri
         else:
-            logger.warning("DATABASE_URL is missing. Falling back to local SQLite database.")
+            logger.warning("No remote DATABASE_URL found or it points to localhost. Falling back to local SQLite database.")
             basedir = os.path.abspath(os.path.dirname(__file__))
             db_path = os.path.join(basedir, "mydispatcher.db")
             return f"sqlite:///{db_path}"
