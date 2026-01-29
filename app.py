@@ -208,8 +208,8 @@ def download_page(mod_id):
     mod = Mod.query.get_or_404(mod_id)
     return render_template('download.html', mod=mod)
 
-@app.route('/download/process/<int:mod_id>')
-def process_download(mod_id):
+@app.route('/download/file/<int:mod_id>')
+def download_file(mod_id):
     mod = Mod.query.get_or_404(mod_id)
     mod.download_count += 1
     db.session.commit()

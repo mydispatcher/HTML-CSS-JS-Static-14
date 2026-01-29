@@ -18,19 +18,8 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-4">
-                {% if mod.video_path %}
-                <div class="video-container">
-                    <video controls class="w-100" style="max-height: 500px; background: #000; border-radius: 12px 12px 0 0;">
-                        <source src="{{ url_for('uploaded_file', filename=mod.video_path.replace('uploads/', '')) }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                {% endif %}
-                
                 {% if mod.image_path %}
-                <div class="{% if mod.video_path %}mt-3{% endif %} p-3">
-                    <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" class="w-100 rounded" style="max-height: 500px; object-fit: cover;" alt="{{ mod.title }}">
-                </div>
+                <img src="{{ url_for('uploaded_file', filename=mod.image_path.replace('uploads/', '')) }}" class="w-100 rounded-top" style="max-height: 500px; object-fit: cover;" alt="{{ mod.title }}">
                 {% endif %}
                 
                 {% if not mod.image_path and not mod.video_path %}
@@ -60,12 +49,24 @@
                     
                     <hr style="border-color: var(--border-color);">
                     
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div class="text-secondary">
                             <i class="bi bi-calendar"></i> {{ mod.created_at.strftime('%B %d, %Y') }}
                             <span class="ms-3"><i class="bi bi-download"></i> {{ mod.download_count }} downloads</span>
                         </div>
                     </div>
+                    
+                    {% if mod.video_path %}
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="bi bi-play-circle"></i> Video Preview</h5>
+                        <div class="ratio ratio-16x9">
+                            <video controls class="rounded" style="background: #000;">
+                                <source src="{{ url_for('uploaded_file', filename=mod.video_path.replace('uploads/', '')) }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             

@@ -60,12 +60,15 @@
         border: none;
         transition: all 0.3s ease;
         display: none;
+        color: white;
+        text-decoration: none;
     }
     
     .download-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(0, 200, 83, 0.4);
         background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+        color: white;
     }
     
     .download-btn.show {
@@ -117,7 +120,7 @@
                 <i class="bi bi-check-lg" style="font-size: 3rem; color: white;"></i>
             </div>
             <h3 class="mb-4">Your download is ready!</h3>
-            <a href="{{ url_for('download_file', mod_id=mod.id, token=token) }}" 
+            <a href="{{ url_for('download_file', mod_id=mod.id) }}" 
                class="btn download-btn show" id="download-btn">
                 <i class="bi bi-download"></i> Download Now
             </a>
@@ -130,4 +133,57 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let timeLeft = 5;
+    const countdownEl = document.getElementById('countdown');
+    const timerContainer = document.getElementById('timer-container');
+    const downloadReady = document.getElementById('download-ready');
+    const downloadBtn = document.getElementById('download-btn');
+    
+    if (!countdownEl || !downloadBtn) return;
+
+    const interval = setInterval(() => {
+        timeLeft--;
+        if (countdownEl) countdownEl.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            if (timerContainer) timerContainer.style.display = 'none';
+            if (downloadReady) downloadReady.style.display = 'block';
+            
+            // Auto-trigger download
+            setTimeout(() => {
+                window.location.href = downloadBtn.href;
+            }, 500);
+        }
+    }, 1000);
+});
+</script>
+{% endblock %}
+    const countdownEl = document.getElementById('countdown');
+    const timerContainer = document.getElementById('timer-container');
+    const downloadReady = document.getElementById('download-ready');
+    const downloadBtn = document.getElementById('download-btn');
+    
+    if (!countdownEl || !downloadBtn) return;
+
+    const interval = setInterval(() => {
+        timeLeft--;
+        if (countdownEl) countdownEl.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            if (timerContainer) timerContainer.style.display = 'none';
+            if (downloadReady) downloadReady.style.display = 'block';
+            
+            // Auto-trigger download
+            setTimeout(() => {
+                window.location.href = downloadBtn.href;
+            }, 500);
+        }
+    }, 1000);
+});
+</script>
 {% endblock %}
