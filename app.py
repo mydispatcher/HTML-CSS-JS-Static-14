@@ -24,6 +24,11 @@ else:
     basedir = os.path.abspath(os.path.dirname(__file__))
     db_path = os.path.join(basedir, "mydispatcher.db")
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+# Ensure we don't accidentally try to connect to localhost if DATABASE_URL is somehow empty string
+if not app.config['SQLALCHEMY_DATABASE_URI'] or app.config['SQLALCHEMY_DATABASE_URI'] == "":
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    db_path = os.path.join(basedir, "mydispatcher.db")
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
