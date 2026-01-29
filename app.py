@@ -16,16 +16,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key-2024')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-if app.config['SQLALCHEMY_DATABASE_URI']:
+if app.config['SQLALCHEMY_DATABASE_URI'] and app.config['SQLALCHEMY_DATABASE_URI'].strip():
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
 else:
     # Use an absolute path for the SQLite database
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, "mydispatcher.db")
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-# Ensure we don't accidentally try to connect to localhost if DATABASE_URL is somehow empty string
-if not app.config['SQLALCHEMY_DATABASE_URI'] or app.config['SQLALCHEMY_DATABASE_URI'] == "":
     basedir = os.path.abspath(os.path.dirname(__file__))
     db_path = os.path.join(basedir, "mydispatcher.db")
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
