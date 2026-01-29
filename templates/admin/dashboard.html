@@ -228,24 +228,52 @@
             
             <div class="card">
                 <div class="card-header bg-transparent" style="border-color: var(--border-color);">
-                    <h5 class="mb-0"><i class="bi bi-people"></i> Recent Users</h5>
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Users & Ranks</h5>
                 </div>
-                <ul class="list-group list-group-flush" style="background: transparent;">
-                    {% for user in users[:5] %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center" 
-                        style="background: transparent; border-color: var(--border-color);">
-                        <div>
-                            <strong>{{ user.username }}</strong>
-                            <br><small class="text-secondary">{{ user.email }}</small>
-                        </div>
-                        {% if user.is_admin %}
-                        <span class="badge bg-primary">Admin</span>
-                        {% else %}
-                        <span class="badge bg-secondary">User</span>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Rank</th>
+                                <th>Badge</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <strong>{{ user.username }}</strong>
+                                    {% if user.is_admin %}<br><small class="text-primary">Administrator</small>{% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ user.badge_color }}">{{ user.rank }}</span>
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('update_user_rank', user_id=user.id) }}" method="POST" class="d-flex gap-2">
+                                        <select name="rank" class="form-select form-select-sm" style="width: auto;">
+                                            <option value="Player" {% if user.rank == 'Player' %}selected{% endif %}>Player</option>
+                                            <option value="Moderator" {% if user.rank == 'Moderator' %}selected{% endif %}>Moderator</option>
+                                            <option value="VIP" {% if user.rank == 'VIP' %}selected{% endif %}>VIP</option>
+                                            <option value="Developer" {% if user.rank == 'Developer' %}selected{% endif %}>Developer</option>
+                                            <option value="Owner" {% if user.rank == 'Owner' %}selected{% endif %}>Owner</option>
+                                        </select>
+                                        <select name="badge_color" class="form-select form-select-sm" style="width: auto;">
+                                            <option value="secondary" {% if user.badge_color == 'secondary' %}selected{% endif %}>Gray</option>
+                                            <option value="primary" {% if user.badge_color == 'primary' %}selected{% endif %}>Blue</option>
+                                            <option value="success" {% if user.badge_color == 'success' %}selected{% endif %}>Green</option>
+                                            <option value="warning text-dark" {% if user.badge_color == 'warning text-dark' %}selected{% endif %}>Yellow</option>
+                                            <option value="danger" {% if user.badge_color == 'danger' %}selected{% endif %}>Red</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-check"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

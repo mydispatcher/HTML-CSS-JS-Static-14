@@ -98,6 +98,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    rank = db.Column(db.String(50), default='Player')
+    badge_color = db.Column(db.String(20), default='secondary')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -213,7 +215,15 @@ def download_file(mod_id):
     mod = Mod.query.get_or_404(mod_id)
     mod.download_count += 1
     db.session.commit()
-    return send_from_directory(os.path.dirname(mod.file_path), os.path.basename(mod.file_path), as_attachment=True)
+    
+    # Clean path logic
+    directory = os.path.join(app.root_path, 'uploads', 'mods')
+    filename = os.path.basename(mod.file_path)
+    return send_from_directory(directory, filename, as_attachment=True)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 @app.route('/comment/delete/<int:comment_id>', methods=['POST'])
 @login_required
@@ -473,10 +483,32 @@ def admin_delete_category(cat_id):
         flash('Error deleting category', 'danger')
     return redirect(url_for('admin'))
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    return "Settings page - Coming Soon"
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password and new_password == confirm_password:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash('Password updated successfully!', 'success')
+            return redirect(url_for('settings'))
+        flash('Passwords do not match or are empty', 'danger')
+        
+    return render_template('settings.html')
+
+@app.route('/admin/user/update/<int:user_id>', methods=['POST'])
+@login_required
+def update_user_rank(user_id):
+    if not current_user.is_admin: return redirect(url_for('index'))
+    user = User.query.get_or_404(user_id)
+    user.rank = request.form.get('rank', 'Player')
+    user.badge_color = request.form.get('badge_color', 'secondary')
+    db.session.commit()
+    flash(f'Updated {user.username}\'s rank', 'success')
+    return redirect(url_for('admin'))
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
