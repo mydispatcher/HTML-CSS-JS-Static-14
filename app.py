@@ -38,37 +38,34 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key
 # Database Connection with Safety Wrapper
 def configure_database(app):
     try:
-        # Check for DATABASE_URL first
+        # Priority 1: DATABASE_URL (if it's not localhost)
         uri = os.environ.get('DATABASE_URL')
-        
-        # If DATABASE_URL is missing or suspicious (like "localhost"), use individual PG variables
-        if not uri or "localhost" in uri:
-            pg_user = os.environ.get('PGUSER')
-            pg_pass = os.environ.get('PGPASSWORD')
-            pg_host = os.environ.get('PGHOST')
-            pg_port = os.environ.get('PGPORT')
-            pg_db = os.environ.get('PGDATABASE')
-            
-            if all([pg_user, pg_pass, pg_host, pg_port, pg_db]):
-                uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-                logger.info("Using PostgreSQL from individual environment variables")
-        
-        if uri and uri.strip() and "localhost" not in uri:
-            # Handle Render's postgres:// format
+        if uri and "localhost" not in uri and uri.strip():
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
-            logger.info("Configuring database with remote URI")
+            logger.info("Using DATABASE_URL for connection")
             return uri
-        else:
-            logger.warning("No remote DATABASE_URL found or it points to localhost. Falling back to local SQLite database.")
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            db_path = os.path.join(basedir, "mydispatcher.db")
-            return f"sqlite:///{db_path}"
-    except Exception as e:
-        logger.error(f"CRITICAL: Failed to parse DATABASE_URL: {e}")
+            
+        # Priority 2: Individual PG variables (common on Replit)
+        pg_user = os.environ.get('PGUSER')
+        pg_pass = os.environ.get('PGPASSWORD')
+        pg_host = os.environ.get('PGHOST')
+        pg_port = os.environ.get('PGPORT')
+        pg_db = os.environ.get('PGDATABASE')
+        
+        if all([pg_user, pg_pass, pg_host, pg_port, pg_db]) and "localhost" not in pg_host:
+            uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+            logger.info("Connected via individual PostgreSQL environment variables")
+            return uri
+            
+        # Fallback: SQLite
+        logger.warning("No remote database found. Using local SQLite.")
         basedir = os.path.abspath(os.path.dirname(__file__))
-        db_path = os.path.join(basedir, "mydispatcher.db")
-        return f"sqlite:///{db_path}"
+        return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
+    except Exception as e:
+        logger.error(f"DB Config Error: {e}")
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = configure_database(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -132,7 +129,7 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='comments')
 
-# Replit Auth Integration
+# Replit Auth
 try:
     from replit_auth import make_replit_blueprint
     app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
@@ -144,7 +141,7 @@ def load_user(user_id):
     try:
         return User.query.get(int(user_id))
     except Exception as e:
-        logger.error(f"Error loading user {user_id}: {e}")
+        logger.error(f"User load error: {e}")
         return None
 
 # Forms
@@ -161,13 +158,6 @@ class RegisterForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
 
-class ModForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    version = StringField('Version', validators=[Length(max=50)])
-    category_id = SelectField('Category', coerce=int)
-    is_featured = BooleanField('Featured')
-
 # Routes
 @app.route('/')
 def index():
@@ -177,19 +167,19 @@ def index():
         categories = Category.query.all()
         return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories)
     except Exception as e:
-        logger.error(f"Index route error: {e}")
-        return "Critical system error - Database initialization might be incomplete. Please refresh in a moment.", 500
+        logger.error(f"Index error: {e}")
+        return "Critical system error - Refresh in a moment.", 500
 
 @app.route('/browse')
 def browse():
     try:
         page = request.args.get('page', 1, type=int)
-        category_id = request.args.get('category', type=int)
+        cat_id = request.args.get('category', type=int)
         search = request.args.get('search', '')
         sort = request.args.get('sort', 'latest')
         
         query = Mod.query
-        if category_id: query = query.filter_by(category_id=category_id)
+        if cat_id: query = query.filter_by(category_id=cat_id)
         if search: query = query.filter(Mod.title.ilike(f'%{search}%') | Mod.description.ilike(f'%{search}%'))
         
         if sort == 'popular': query = query.order_by(Mod.download_count.desc())
@@ -197,9 +187,8 @@ def browse():
         else: query = query.order_by(Mod.created_at.desc())
         
         mods = query.paginate(page=page, per_page=12, error_out=False)
-        categories = Category.query.all()
-        return render_template('browse.html', mods=mods, categories=categories, 
-                             current_category=category_id, search=search, sort=sort)
+        return render_template('browse.html', mods=mods, categories=Category.query.all(), 
+                             current_category=cat_id, search=search, sort=sort)
     except Exception as e:
         logger.error(f"Browse error: {e}")
         return redirect(url_for('index'))
@@ -208,18 +197,16 @@ def browse():
 def mod_detail(mod_id):
     try:
         mod = Mod.query.get_or_404(mod_id)
-        form = CommentForm()
-        related_mods = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
-        return render_template('mod_detail.html', mod=mod, related_mods=related_mods, form=form)
+        related = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
+        return render_template('mod_detail.html', mod=mod, related_mods=related, form=CommentForm())
     except Exception as e:
-        logger.error(f"Mod detail error: {e}")
+        logger.error(f"Detail error: {e}")
         return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     try:
-        if current_user.is_authenticated:
-            return redirect(url_for('index'))
+        if current_user.is_authenticated: return redirect(url_for('index'))
         form = LoginForm()
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data).first()
@@ -236,83 +223,47 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     try:
-        if current_user.is_authenticated:
-            return redirect(url_for('index'))
+        if current_user.is_authenticated: return redirect(url_for('index'))
         form = RegisterForm()
         if form.validate_on_submit():
             if User.query.filter_by(email=form.email.data).first():
-                flash('Email already registered', 'danger')
+                flash('Email taken', 'danger')
                 return render_template('register.html', form=form)
             user = User(username=form.username.data, email=form.email.data)
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
-            flash('Account created! You can now login.', 'success')
+            flash('Account created!', 'success')
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
     except Exception as e:
-        logger.error(f"Registration error: {e}")
+        logger.error(f"Reg error: {e}")
         return redirect(url_for('index'))
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('Logged out.', 'info')
     return redirect(url_for('index'))
 
-@app.route('/download/<int:mod_id>')
-def download_page(mod_id):
-    try:
-        mod = Mod.query.get_or_404(mod_id)
-        token = str(uuid.uuid4())
-        mod.download_token = token
-        db.session.commit()
-        return render_template('download.html', mod=mod, token=token)
-    except Exception as e:
-        logger.error(f"Download page error: {e}")
-        return redirect(url_for('index'))
-
-@app.route('/download-file/<int:mod_id>/<token>')
-def download_file(mod_id, token):
-    try:
-        mod = Mod.query.get_or_404(mod_id)
-        if mod.download_token != token:
-            flash('Invalid token', 'danger')
-            return redirect(url_for('mod_detail', mod_id=mod_id))
-        mod.download_count = (mod.download_count or 0) + 1
-        db.session.commit()
-        if mod.file_path:
-            return send_from_directory(os.path.dirname(os.path.abspath(mod.file_path)), os.path.basename(mod.file_path), as_attachment=True)
-        return redirect(url_for('mod_detail', mod_id=mod_id))
-    except Exception as e:
-        logger.error(f"Download file error: {e}")
-        return redirect(url_for('index'))
-
 # Database Initialization
-def init_db_safely():
+def init_db():
     try:
         with app.app_context():
-            # Explicitly create tables
             db.create_all()
-            
             if not User.query.filter_by(email='admin@mydispatcher.com').first():
                 admin = User(username='admin', email='admin@mydispatcher.com', is_admin=True)
                 admin.set_password('admin123')
                 db.session.add(admin)
-                
             if not Category.query.first():
-                for name in ['Vehicles', 'Scripts', 'Maps', 'Weapons', 'Characters', 'Graphics']:
-                    db.session.add(Category(name=name))
-                    
+                for n in ['Vehicles', 'Scripts', 'Maps', 'Weapons', 'Characters', 'Graphics']:
+                    db.session.add(Category(name=n))
             db.session.commit()
-            logger.info("Database system ready with all tables created.")
+            logger.info("DB Ready")
     except Exception as e:
-        logger.error(f"FATAL: Database initialization failed: {e}")
+        logger.error(f"DB Init Fatal: {e}")
 
-# Pre-run initialization
-init_db_safely()
+init_db()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
