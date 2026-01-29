@@ -38,13 +38,28 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key
 # Database Connection with Safety Wrapper
 def configure_database(app):
     try:
-        # Priority 1: DATABASE_URL (if it's not localhost)
+        # Priority 1: DATABASE_URL (Check for user-provided string or env var)
         uri = os.environ.get('DATABASE_URL')
-        if uri and "localhost" not in uri and uri.strip():
+        
+        # User explicitly provided this URI, let's prioritize it
+        user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@localhost:5432/MyDispatcher"
+        
+        if not uri or uri.strip() == "":
+            uri = user_provided_uri
+            logger.info("Using user-provided PostgreSQL URI")
+        
+        if uri and uri.strip():
+            # If the user explicitly provided a localhost URI, we must honor it 
+            # while still handling the postgres:// vs postgresql:// for other URIs
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
-            logger.info("Using DATABASE_URL for connection")
-            return uri
+            
+            # If it's the user's localhost URI, we skip the general "localhost" safety filter
+            if "localhost" in uri and uri != user_provided_uri:
+                logger.warning("Localhost detected in environment DATABASE_URL, which is usually invalid on Replit.")
+            else:
+                logger.info("Database URI configured successfully")
+                return uri
             
         # Priority 2: Individual PG variables (common on Replit)
         pg_user = os.environ.get('PGUSER')
