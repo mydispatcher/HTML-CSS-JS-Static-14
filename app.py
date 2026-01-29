@@ -44,8 +44,8 @@ def configure_database(app):
         # User explicitly provided this URI
         user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@localhost:5432/dispatcherstore"
         
-        # Check if we're on Render (Render usually sets RENDER or DATABASE_URL is non-localhost)
-        is_render = os.environ.get('RENDER') or (uri and "localhost" not in uri)
+        # Check if we're on Render (Render usually sets RENDER)
+        is_render = os.environ.get('RENDER')
         
         if not uri or uri.strip() == "":
             uri = user_provided_uri
@@ -55,9 +55,9 @@ def configure_database(app):
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
             
-            # On Render, we assume localhost is correctly configured via their internal networking if provided
-            # On Replit, we fallback to SQLite for localhost to prevent immediate crash
-            if "localhost" in uri and not is_render and not os.environ.get('ALLOW_LOCALHOST_DB'):
+            # CRITICAL FIX: Always fallback to SQLite if "localhost" is in the URI 
+            # and we are NOT on Render. 
+            if "localhost" in uri and not is_render:
                 logger.warning(f"Localhost detected on non-Render environment. Falling back to SQLite.")
                 basedir = os.path.abspath(os.path.dirname(__file__))
                 return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
