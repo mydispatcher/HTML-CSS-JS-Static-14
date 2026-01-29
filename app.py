@@ -55,6 +55,16 @@ def configure_database(app):
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
             
+            # Add SSL requirements for Supabase if not present
+            if "supabase.co" in uri and "sslmode" not in uri:
+                separator = "&" if "?" in uri else "?"
+                uri = f"{uri}{separator}sslmode=require"
+            
+            # Force IPv4 for Supabase if requested (via pgbouncer port 6543 or 5432)
+            # Some environments (like Render) have trouble with IPv6 to Supabase
+            # We don't change the host here, but the user should ensure they use the 
+            # connection pooling URL (port 6543) if port 5432 is blocked.
+            
             logger.info("Database URI configured successfully from environment")
             return uri
         
