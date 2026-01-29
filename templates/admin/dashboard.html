@@ -248,16 +248,16 @@
                                     {% if user.is_admin %}<br><small class="text-primary">Administrator</small>{% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ user.badge_color }}">{{ user.rank }}</span>
+                                    <span class="badge bg-{{ user.badge_color }}">{{ user.user_rank }}</span>
                                 </td>
                                 <td>
                                     <form action="{{ url_for('update_user_rank', user_id=user.id) }}" method="POST" class="d-flex gap-2">
                                         <select name="rank" class="form-select form-select-sm" style="width: auto;">
-                                            <option value="Player" {% if user.rank == 'Player' %}selected{% endif %}>Player</option>
-                                            <option value="Moderator" {% if user.rank == 'Moderator' %}selected{% endif %}>Moderator</option>
-                                            <option value="VIP" {% if user.rank == 'VIP' %}selected{% endif %}>VIP</option>
-                                            <option value="Developer" {% if user.rank == 'Developer' %}selected{% endif %}>Developer</option>
-                                            <option value="Owner" {% if user.rank == 'Owner' %}selected{% endif %}>Owner</option>
+                                            <option value="Player" {% if user.user_rank == 'Player' %}selected{% endif %}>Player</option>
+                                            <option value="Moderator" {% if user.user_rank == 'Moderator' %}selected{% endif %}>Moderator</option>
+                                            <option value="VIP" {% if user.user_rank == 'VIP' %}selected{% endif %}>VIP</option>
+                                            <option value="Developer" {% if user.user_rank == 'Developer' %}selected{% endif %}>Developer</option>
+                                            <option value="Owner" {% if user.user_rank == 'Owner' %}selected{% endif %}>Owner</option>
                                         </select>
                                         <select name="badge_color" class="form-select form-select-sm" style="width: auto;">
                                             <option value="secondary" {% if user.badge_color == 'secondary' %}selected{% endif %}>Gray</option>

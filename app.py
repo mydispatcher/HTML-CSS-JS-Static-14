@@ -98,7 +98,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    rank = db.Column(db.String(50), default='Player')
+    user_rank = db.Column(db.String(50), default='Player')
     badge_color = db.Column(db.String(20), default='secondary')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -504,7 +504,7 @@ def settings():
 def update_user_rank(user_id):
     if not current_user.is_admin: return redirect(url_for('index'))
     user = User.query.get_or_404(user_id)
-    user.rank = request.form.get('rank', 'Player')
+    user.user_rank = request.form.get('rank', 'Player')
     user.badge_color = request.form.get('badge_color', 'secondary')
     db.session.commit()
     flash(f'Updated {user.username}\'s rank', 'success')
