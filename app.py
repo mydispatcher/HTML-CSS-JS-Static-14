@@ -241,6 +241,7 @@ def delete_comment(comment_id):
 @app.route('/mod/<int:mod_id>', methods=['GET', 'POST'])
 def mod_detail(mod_id):
     try:
+        logger.info(f"Accessing mod_detail for mod_id: {mod_id}")
         mod = Mod.query.get_or_404(mod_id)
         form = CommentForm()
         if form.validate_on_submit() and current_user.is_authenticated:
@@ -255,7 +256,7 @@ def mod_detail(mod_id):
         related = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
         return render_template('mod_detail.html', mod=mod, related_mods=related, form=form)
     except Exception as e:
-        logger.error(f"Detail error: {e}")
+        logger.error(f"Detail error for mod {mod_id}: {e}")
         return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -264,11 +265,19 @@ def login():
         if current_user.is_authenticated: return redirect(url_for('index'))
         form = LoginForm()
         if form.validate_on_submit():
+            logger.info(f"Login attempt for email: {form.email.data}")
             user = User.query.filter_by(email=form.email.data).first()
-            if user and user.check_password(form.password.data):
-                login_user(user)
-                flash('Welcome back!', 'success')
-                return redirect(url_for('index'))
+            if user:
+                logger.info(f"User found: {user.username}")
+                if user.check_password(form.password.data):
+                    logger.info(f"Password correct for user: {user.username}")
+                    login_user(user)
+                    flash('Welcome back!', 'success')
+                    return redirect(url_for('index'))
+                else:
+                    logger.warning(f"Invalid password for user: {user.username}")
+            else:
+                logger.warning(f"No user found with email: {form.email.data}")
             flash('Invalid credentials', 'danger')
         return render_template('login.html', form=form)
     except Exception as e:
