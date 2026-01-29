@@ -44,6 +44,9 @@ def configure_database(app):
         # User explicitly provided this URI
         user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@localhost:5432/dispatcherstore"
         
+        # Check if we're on Render (Render usually sets RENDER or DATABASE_URL is non-localhost)
+        is_render = os.environ.get('RENDER') or (uri and "localhost" not in uri)
+        
         if not uri or uri.strip() == "":
             uri = user_provided_uri
             logger.info("Using user-provided PostgreSQL URI")
@@ -52,20 +55,12 @@ def configure_database(app):
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
             
-            # CRITICAL FIX: If localhost connection fails, we MUST fallback
-            # We'll return the URI but we also need to handle the failure at the SQLAlchemy level
-            # For now, let's try to detect if we're in a Replit environment where localhost:5432 won't work
-            if "localhost" in uri and not os.environ.get('ALLOW_LOCALHOST_DB'):
-                logger.warning(f"Connection to {uri} likely to fail on Replit. Checking for local fallback.")
-                # We'll return it, but the app.run or init_db might fail.
-                # Let's check if we can actually reach it or if we should just use SQLite
-                # On Replit, unless a sidecar is running, localhost:5432 is usually closed.
-                # To be safe and keep the user's app RUNNING, we'll use SQLite if localhost is detected
-                # unless specifically allowed.
+            # On Render, we assume localhost is correctly configured via their internal networking if provided
+            # On Replit, we fallback to SQLite for localhost to prevent immediate crash
+            if "localhost" in uri and not is_render and not os.environ.get('ALLOW_LOCALHOST_DB'):
+                logger.warning(f"Localhost detected on non-Render environment. Falling back to SQLite.")
                 basedir = os.path.abspath(os.path.dirname(__file__))
-                db_path = os.path.join(basedir, "mydispatcher.db")
-                logger.info(f"Falling back to SQLite: {db_path} to prevent 500 error.")
-                return f"sqlite:///{db_path}"
+                return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
 
             logger.info("Database URI configured successfully")
             return uri
