@@ -51,18 +51,10 @@ def configure_database(app):
                 uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
 
         if uri and uri.strip():
-            # Handle Render's postgres:// format
+            # Handle Render/Supabase postgres:// format
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
             
-            # Final Safety: Detect if connection is to localhost on a platform that doesn't support it
-            # On Render, if they provide a localhost URL in DATABASE_URL, they usually mean it.
-            # But we must ensure it's not a leftover from a local dev environment.
-            if "localhost" in uri and not os.environ.get('RENDER'):
-                logger.warning("Localhost detected on non-Render environment. Falling back to SQLite.")
-                basedir = os.path.abspath(os.path.dirname(__file__))
-                return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
-
             logger.info("Database URI configured successfully from environment")
             return uri
         
