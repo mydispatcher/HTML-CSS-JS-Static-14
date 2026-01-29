@@ -1,73 +1,65 @@
 # MyDispatcher - GTA 5 Mod Store
 
 ## Overview
-MyDispatcher is a full-featured GTA 5 mod store web application that allows users to browse, download, and share game modifications. The platform includes user authentication, an admin panel for content management, mod browsing with search and filtering capabilities, video upload support for mod previews, and a custom download page with a countdown timer. The application features a dark theme with a blue/black color scheme optimized for gaming communities.
+A full-featured GTA 5 mod store with user authentication, admin panel, mod browsing with search/filters, video uploads for mods, and a custom download page with 5-second timer. Features a dark theme with black and blue accents.
 
-## User Preferences
-Preferred communication style: Simple, everyday language.
+## Admin Credentials
+- **Email**: admin@mydispatcher.com
+- **Password**: admin123
 
-## System Architecture
+## Features
+- User authentication (login/register)
+- Admin panel for managing mods and categories
+- Browse mods with search and category filters
+- Sort by latest, popular, or oldest
+- Featured mods section on homepage
+- Video upload support for mod previews
+- Custom download page with 5-second countdown timer
+- Dark theme with blue/black color scheme
+- Comment system on mod pages (users can comment, admins/owners can delete)
 
-### Backend Framework
-- **Flask** serves as the web framework, chosen for its simplicity and flexibility for small-to-medium web applications
-- Uses Flask-SQLAlchemy for ORM database interactions
-- Flask-Login handles session management and user authentication
-- Flask-WTF provides form handling with CSRF protection
-- Flask-Dance enables OAuth integration (Replit authentication)
+## Tech Stack
+- **Backend**: Python Flask
+- **Database**: PostgreSQL
+- **Frontend**: Bootstrap 5, Custom CSS
+- **Authentication**: Flask-Login with password hashing
 
-### Authentication System
-- Dual authentication: traditional email/password login and OAuth via Replit
-- Passwords are hashed using Werkzeug's security functions
-- Admin users have elevated privileges controlled by an `is_admin` boolean flag
-- Default admin credentials: admin@mydispatcher.com / admin123
+## Project Structure
+```
+/
+├── app.py              # Main Flask application
+├── templates/
+│   ├── base.html       # Base template with navigation
+│   ├── index.html      # Homepage
+│   ├── login.html      # Login page
+│   ├── register.html   # Registration page
+│   ├── browse.html     # Mod browsing with filters
+│   ├── mod_detail.html # Single mod view
+│   ├── download.html   # Download page with timer
+│   └── admin/
+│       ├── dashboard.html   # Admin dashboard
+│       ├── mod_form.html    # Add/edit mod form
+│       └── category_form.html # Add category form
+├── uploads/            # Uploaded files directory
+│   ├── mods/           # Mod files (.zip, .rar, etc.)
+│   ├── images/         # Mod cover images
+│   └── videos/         # Mod preview videos
+└── static/             # Static assets
+```
 
-### Database Models
-- **User**: Stores user accounts with username, email, hashed password, admin status
-- **Category**: Organizes mods into browsable categories
-- **Mod**: Main content model with relationships to categories (implied from code structure)
+## Database Models
+- **User**: id, username, email, password_hash, is_admin, created_at
+- **Category**: id, name, description
+- **Mod**: id, title, description, version, file_path, image_path, video_path, download_count, category_id, is_featured, download_token
+- **Comment**: id, content, user_id, mod_id, created_at
 
-### File Upload System
-- Supports three types of uploads: mod files, images, and videos
-- Files stored in `uploads/` directory with subdirectories for organization
-- Maximum upload size: 500MB
-- Secure filename handling via Werkzeug utilities
+## Default Categories
+- Vehicles
+- Scripts
+- Maps
+- Weapons
+- Characters
+- Graphics
 
-### Frontend Architecture
-- Server-side rendering with Jinja2 templates
-- Bootstrap 5 for responsive layout and components
-- Custom CSS with CSS variables for consistent dark theme styling
-- Template inheritance from `base.html` for consistent layout
-
-### Route Structure
-- Public routes: homepage, browse, mod details, download page
-- Auth routes: login, register, logout
-- Admin routes: dashboard, mod management, category management
-- Protected routes use `@login_required` decorator
-
-## External Dependencies
-
-### Database
-- **PostgreSQL** as the primary database (configured via `DATABASE_URL` environment variable)
-- psycopg2-binary for PostgreSQL connectivity
-
-### Authentication Services
-- Replit OIDC integration for OAuth authentication
-- PyJWT for token handling
-
-### Frontend CDN Resources
-- Bootstrap 5.3.0 CSS and JS
-- Bootstrap Icons 1.10.0
-
-### Python Packages (Key Dependencies)
-- Flask 3.1.2 - Web framework
-- Flask-SQLAlchemy 3.1.1 - Database ORM
-- Flask-Login 0.6.3 - User session management
-- Flask-WTF 1.2.2 - Form handling
-- Flask-Dance 7.1.0 - OAuth integration
-- Gunicorn - Production WSGI server
-
-### Environment Variables Required
-- `SECRET_KEY` - Flask session secret
-- `DATABASE_URL` - PostgreSQL connection string
-- `REPL_ID` - Replit application identifier (for OAuth)
-- `ISSUER_URL` - OAuth issuer URL
+## Running the Application
+The application runs on port 5000 with the command `python app.py`.
