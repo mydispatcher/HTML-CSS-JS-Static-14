@@ -13,7 +13,14 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 import uuid
 
-# Configure Logging
+# Load dotenv if available (for local development)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# Configure Logging to Replit Console
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
@@ -28,21 +35,28 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key-2024')
 
-# Database Configuration with Robust Formatting
-def get_db_uri():
-    uri = os.environ.get('DATABASE_URL')
-    if uri and uri.strip():
-        # Handle Render's postgres:// format
-        if uri.startswith("postgres://"):
-            uri = uri.replace("postgres://", "postgresql://", 1)
-        return uri
-    
-    # Fallback to SQLite
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, "mydispatcher.db")
-    return f"sqlite:///{db_path}"
+# Database Connection with Safety Wrapper
+def configure_database(app):
+    try:
+        uri = os.environ.get('DATABASE_URL')
+        if uri and uri.strip():
+            # Handle Render's postgres:// format
+            if uri.startswith("postgres://"):
+                uri = uri.replace("postgres://", "postgresql://", 1)
+            logger.info(f"Using DATABASE_URL from environment")
+            return uri
+        else:
+            logger.warning("DATABASE_URL is missing. Falling back to local SQLite database.")
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            db_path = os.path.join(basedir, "mydispatcher.db")
+            return f"sqlite:///{db_path}"
+    except Exception as e:
+        logger.error(f"CRITICAL: Failed to parse DATABASE_URL: {e}")
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        db_path = os.path.join(basedir, "mydispatcher.db")
+        return f"sqlite:///{db_path}"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
+app.config['SQLALCHEMY_DATABASE_URI'] = configure_database(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
@@ -100,19 +114,19 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='comments')
 
-# Replit Auth
+# Replit Auth Integration
 try:
     from replit_auth import make_replit_blueprint
     app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
 except ImportError:
-    logger.warning("replit_auth not found, skipping Replit Auth blueprint")
+    pass
 
 @login_manager.user_loader
 def load_user(user_id):
     try:
         return User.query.get(int(user_id))
-    except (ValueError, TypeError, Exception) as e:
-        logger.error(f"Error loading user: {e}")
+    except Exception as e:
+        logger.error(f"Error loading user {user_id}: {e}")
         return None
 
 # Forms
@@ -126,6 +140,9 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
 
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
+
 class ModForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
     description = TextAreaField('Description', validators=[DataRequired()])
@@ -133,37 +150,52 @@ class ModForm(FlaskForm):
     category_id = SelectField('Category', coerce=int)
     is_featured = BooleanField('Featured')
 
-class CategoryForm(FlaskForm):
-    name = StringField('Category Name', validators=[DataRequired(), Length(max=100)])
-    description = TextAreaField('Description')
-
-class CommentForm(FlaskForm):
-    content = TextAreaField('Comment', validators=[
-        DataRequired(message="Comment cannot be empty"),
-        Length(min=1, max=1000, message="Comment must be at least 1 character long")
-    ])
-
-class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField('Current Password', validators=[DataRequired()])
-    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
-
-class ChangeEmailForm(FlaskForm):
-    new_email = StringField('New Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Current Password', validators=[DataRequired()])
-
-# Routes with Error Handling
+# Routes
 @app.route('/')
 def index():
     try:
         featured_mods = Mod.query.filter_by(is_featured=True).limit(6).all()
         latest_mods = Mod.query.order_by(Mod.created_at.desc()).limit(8).all()
         categories = Category.query.all()
-        total_users = User.query.count()
-        return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories, total_users=total_users)
+        return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories)
     except Exception as e:
-        logger.error(f"Error in index route: {e}")
-        return "Internal Server Error", 500
+        logger.error(f"Index route error: {e}")
+        return "Critical system error - Please check console logs.", 500
+
+@app.route('/browse')
+def browse():
+    try:
+        page = request.args.get('page', 1, type=int)
+        category_id = request.args.get('category', type=int)
+        search = request.args.get('search', '')
+        sort = request.args.get('sort', 'latest')
+        
+        query = Mod.query
+        if category_id: query = query.filter_by(category_id=category_id)
+        if search: query = query.filter(Mod.title.ilike(f'%{search}%') | Mod.description.ilike(f'%{search}%'))
+        
+        if sort == 'popular': query = query.order_by(Mod.download_count.desc())
+        elif sort == 'oldest': query = query.order_by(Mod.created_at.asc())
+        else: query = query.order_by(Mod.created_at.desc())
+        
+        mods = query.paginate(page=page, per_page=12, error_out=False)
+        categories = Category.query.all()
+        return render_template('browse.html', mods=mods, categories=categories, 
+                             current_category=category_id, search=search, sort=sort)
+    except Exception as e:
+        logger.error(f"Browse error: {e}")
+        return redirect(url_for('index'))
+
+@app.route('/mod/<int:mod_id>')
+def mod_detail(mod_id):
+    try:
+        mod = Mod.query.get_or_404(mod_id)
+        form = CommentForm()
+        related_mods = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
+        return render_template('mod_detail.html', mod=mod, related_mods=related_mods, form=form)
+    except Exception as e:
+        logger.error(f"Mod detail error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -175,14 +207,13 @@ def login():
             user = User.query.filter_by(email=form.email.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user)
-                flash('Logged in successfully!', 'success')
-                next_page = request.args.get('next')
-                return redirect(next_page or url_for('index'))
-            flash('Invalid email or password', 'error')
+                flash('Welcome back!', 'success')
+                return redirect(url_for('index'))
+            flash('Invalid credentials', 'danger')
         return render_template('login.html', form=form)
     except Exception as e:
-        logger.error(f"Error in login route: {e}")
-        return "Internal Server Error", 500
+        logger.error(f"Login error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -192,115 +223,25 @@ def register():
         form = RegisterForm()
         if form.validate_on_submit():
             if User.query.filter_by(email=form.email.data).first():
-                flash('Email already registered', 'error')
-                return render_template('register.html', form=form)
-            if User.query.filter_by(username=form.username.data).first():
-                flash('Username already taken', 'error')
+                flash('Email already registered', 'danger')
                 return render_template('register.html', form=form)
             user = User(username=form.username.data, email=form.email.data)
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
-            flash('Registration successful! Please login.', 'success')
+            flash('Account created! You can now login.', 'success')
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
     except Exception as e:
-        logger.error(f"Error in register route: {e}")
-        return "Internal Server Error", 500
+        logger.error(f"Registration error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/logout')
 @login_required
 def logout():
-    try:
-        logout_user()
-        flash('Logged out successfully', 'success')
-        return redirect(url_for('index'))
-    except Exception as e:
-        logger.error(f"Error in logout route: {e}")
-        return redirect(url_for('index'))
-
-@app.route('/browse')
-def browse():
-    try:
-        page = request.args.get('page', 1, type=int)
-        category_id = request.args.get('category', type=int)
-        search = request.args.get('search', '')
-        sort = request.args.get('sort', 'latest')
-        
-        query = Mod.query
-        
-        if category_id:
-            query = query.filter_by(category_id=category_id)
-        
-        if search:
-            query = query.filter(Mod.title.ilike(f'%{search}%') | Mod.description.ilike(f'%{search}%'))
-        
-        if sort == 'popular':
-            query = query.order_by(Mod.download_count.desc())
-        elif sort == 'oldest':
-            query = query.order_by(Mod.created_at.asc())
-        else:
-            query = query.order_by(Mod.created_at.desc())
-        
-        mods = query.paginate(page=page, per_page=12, error_out=False)
-        categories = Category.query.all()
-        
-        return render_template('browse.html', mods=mods, categories=categories, 
-                             current_category=category_id, search=search, sort=sort)
-    except Exception as e:
-        logger.error(f"Error in browse route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/mod/<int:mod_id>', methods=['GET', 'POST'])
-def mod_detail(mod_id):
-    try:
-        mod = Mod.query.get_or_404(mod_id)
-        form = CommentForm()
-        
-        if form.validate_on_submit() and current_user.is_authenticated:
-            content = form.content.data.strip()
-            if not content:
-                return jsonify({'success': False, 'message': 'Comment cannot be empty'}), 400
-            
-            comment = Comment(
-                content=content,
-                user_id=current_user.id,
-                mod_id=mod.id
-            )
-            db.session.add(comment)
-            db.session.commit()
-            return jsonify({
-                'success': True,
-                'comment': {
-                    'id': comment.id,
-                    'content': comment.content,
-                    'username': current_user.username,
-                    'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M')
-                }
-            })
-        
-        related_mods = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
-        return render_template('mod_detail.html', mod=mod, related_mods=related_mods, form=form)
-    except Exception as e:
-        logger.error(f"Error in mod_detail route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/comment/delete/<int:comment_id>', methods=['POST'])
-@login_required
-def delete_comment(comment_id):
-    try:
-        comment = Comment.query.get_or_404(comment_id)
-        if current_user.id == comment.user_id or current_user.is_admin:
-            mod_id = comment.mod_id
-            db.session.delete(comment)
-            db.session.commit()
-            flash('Comment deleted', 'success')
-            return redirect(url_for('mod_detail', mod_id=mod_id))
-        flash('Permission denied', 'error')
-        return redirect(url_for('index'))
-    except Exception as e:
-        logger.error(f"Error in delete_comment route: {e}")
-        return redirect(url_for('index'))
+    logout_user()
+    flash('Logged out.', 'info')
+    return redirect(url_for('index'))
 
 @app.route('/download/<int:mod_id>')
 def download_page(mod_id):
@@ -311,292 +252,43 @@ def download_page(mod_id):
         db.session.commit()
         return render_template('download.html', mod=mod, token=token)
     except Exception as e:
-        logger.error(f"Error in download_page route: {e}")
-        return "Internal Server Error", 500
+        logger.error(f"Download page error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/download-file/<int:mod_id>/<token>')
 def download_file(mod_id, token):
     try:
         mod = Mod.query.get_or_404(mod_id)
         if mod.download_token != token:
-            flash('Invalid download link', 'error')
+            flash('Invalid token', 'danger')
             return redirect(url_for('mod_detail', mod_id=mod_id))
-        
         mod.download_count = (mod.download_count or 0) + 1
-        mod.download_token = None
         db.session.commit()
-        
         if mod.file_path:
-            directory = os.path.dirname(os.path.abspath(mod.file_path))
-            filename = os.path.basename(mod.file_path)
-            return send_from_directory(directory, filename, as_attachment=True)
-        
-        flash('File not found', 'error')
+            return send_from_directory(os.path.dirname(os.path.abspath(mod.file_path)), os.path.basename(mod.file_path), as_attachment=True)
         return redirect(url_for('mod_detail', mod_id=mod_id))
     except Exception as e:
-        logger.error(f"Error in download_file route: {e}")
-        return "Internal Server Error", 500
+        logger.error(f"Download file error: {e}")
+        return redirect(url_for('index'))
 
-@app.route('/admin')
-@login_required
-def admin():
-    try:
-        if not current_user.is_admin:
-            flash('Access denied', 'error')
-            return redirect(url_for('index'))
-        
-        mods = Mod.query.order_by(Mod.created_at.desc()).all()
-        categories = Category.query.all()
-        users = User.query.all()
-        
-        stats = {
-            'total_mods': len(mods),
-            'total_users': len(users),
-            'total_downloads': sum(m.download_count for m in mods),
-            'total_categories': len(categories)
-        }
-        
-        return render_template('admin/dashboard.html', mods=mods, categories=categories, 
-                             users=users, stats=stats)
-    except Exception as e:
-        logger.error(f"Error in admin route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/admin/mod/new', methods=['GET', 'POST'])
-@login_required
-def admin_new_mod():
-    try:
-        if not current_user.is_admin:
-            flash('Access denied', 'error')
-            return redirect(url_for('index'))
-        
-        form = ModForm()
-        form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-        
-        if form.validate_on_submit():
-            mod = Mod(
-                title=form.title.data,
-                description=form.description.data,
-                version=form.version.data,
-                category_id=form.category_id.data,
-                is_featured=form.is_featured.data
-            )
-            
-            if 'mod_file' in request.files:
-                file = request.files['mod_file']
-                if file and file.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
-                    filepath = os.path.join('uploads/mods', filename)
-                    file.save(filepath)
-                    mod.file_path = filepath
-            
-            if 'image' in request.files:
-                image = request.files['image']
-                if image and image.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{image.filename}")
-                    filepath = os.path.join('uploads/images', filename)
-                    image.save(filepath)
-                    mod.image_path = filepath
-            
-            if 'video' in request.files:
-                video = request.files['video']
-                if video and video.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{video.filename}")
-                    filepath = os.path.join('uploads/videos', filename)
-                    video.save(filepath)
-                    mod.video_path = filepath
-            
-            db.session.add(mod)
-            db.session.commit()
-            flash('Mod created successfully!', 'success')
-            return redirect(url_for('admin'))
-        
-        return render_template('admin/mod_form.html', form=form, title='Add New Mod')
-    except Exception as e:
-        logger.error(f"Error in admin_new_mod route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/admin/mod/edit/<int:mod_id>', methods=['GET', 'POST'])
-@login_required
-def admin_edit_mod(mod_id):
-    try:
-        if not current_user.is_admin:
-            flash('Access denied', 'error')
-            return redirect(url_for('index'))
-        
-        mod = Mod.query.get_or_404(mod_id)
-        form = ModForm(obj=mod)
-        form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-        
-        if form.validate_on_submit():
-            mod.title = form.title.data
-            mod.description = form.description.data
-            mod.version = form.version.data
-            mod.category_id = form.category_id.data
-            mod.is_featured = form.is_featured.data
-            
-            if 'mod_file' in request.files:
-                file = request.files['mod_file']
-                if file and file.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
-                    filepath = os.path.join('uploads/mods', filename)
-                    file.save(filepath)
-                    mod.file_path = filepath
-            
-            if 'image' in request.files:
-                image = request.files['image']
-                if image and image.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{image.filename}")
-                    filepath = os.path.join('uploads/images', filename)
-                    image.save(filepath)
-                    mod.image_path = filepath
-            
-            if 'video' in request.files:
-                video = request.files['video']
-                if video and video.filename:
-                    filename = secure_filename(f"{uuid.uuid4()}_{video.filename}")
-                    filepath = os.path.join('uploads/videos', filename)
-                    video.save(filepath)
-                    mod.video_path = filepath
-            
-            db.session.commit()
-            flash('Mod updated successfully!', 'success')
-            return redirect(url_for('admin'))
-        
-        return render_template('admin/mod_form.html', form=form, mod=mod, title='Edit Mod')
-    except Exception as e:
-        logger.error(f"Error in admin_edit_mod route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/admin/mod/delete/<int:mod_id>', methods=['POST'])
-@login_required
-def admin_delete_mod(mod_id):
-    try:
-        if not current_user.is_admin:
-            return jsonify({'error': 'Access denied'}), 403
-        
-        mod = Mod.query.get_or_404(mod_id)
-        db.session.delete(mod)
-        db.session.commit()
-        flash('Mod deleted successfully!', 'success')
-        return redirect(url_for('admin'))
-    except Exception as e:
-        logger.error(f"Error in admin_delete_mod route: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/admin/category/new', methods=['GET', 'POST'])
-@login_required
-def admin_new_category():
-    try:
-        if not current_user.is_admin:
-            flash('Access denied', 'error')
-            return redirect(url_for('index'))
-        
-        form = CategoryForm()
-        if form.validate_on_submit():
-            category = Category(name=form.name.data, description=form.description.data)
-            db.session.add(category)
-            db.session.commit()
-            flash('Category created successfully!', 'success')
-            return redirect(url_for('admin'))
-        
-        return render_template('admin/category_form.html', form=form, title='Add Category')
-    except Exception as e:
-        logger.error(f"Error in admin_new_category route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/admin/category/delete/<int:cat_id>', methods=['POST'])
-@login_required
-def admin_delete_category(cat_id):
-    try:
-        if not current_user.is_admin:
-            return jsonify({'error': 'Access denied'}), 403
-        
-        category = Category.query.get_or_404(cat_id)
-        db.session.delete(category)
-        db.session.commit()
-        flash('Category deleted successfully!', 'success')
-        return redirect(url_for('admin'))
-    except Exception as e:
-        logger.error(f"Error in admin_delete_category route: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/settings', methods=['GET', 'POST'])
-@login_required
-def settings():
-    try:
-        password_form = ChangePasswordForm(prefix='password')
-        email_form = ChangeEmailForm(prefix='email')
-        
-        if request.method == 'POST':
-            if 'password-submit' in request.form:
-                if password_form.validate_on_submit():
-                    if current_user.check_password(password_form.current_password.data):
-                        current_user.set_password(password_form.new_password.data)
-                        db.session.commit()
-                        flash('Password updated successfully!', 'success')
-                        return redirect(url_for('settings'))
-                    else:
-                        flash('Current password is incorrect', 'error')
-            elif 'email-submit' in request.form:
-                if email_form.validate_on_submit():
-                    if current_user.check_password(email_form.password.data):
-                        if User.query.filter_by(email=email_form.new_email.data).first():
-                            flash('Email already in use', 'error')
-                        else:
-                            current_user.email = email_form.new_email.data
-                            db.session.commit()
-                            flash('Email updated successfully!', 'success')
-                            return redirect(url_for('settings'))
-                    else:
-                        flash('Password is incorrect', 'error')
-        
-        return render_template('settings.html', password_form=password_form, email_form=email_form)
-    except Exception as e:
-        logger.error(f"Error in settings route: {e}")
-        return "Internal Server Error", 500
-
-@app.route('/uploads/<path:filename>')
-def uploaded_file(filename):
-    return send_from_directory('uploads', filename)
-
-def init_db():
+# Database Initialization
+def init_db_safely():
     try:
         with app.app_context():
             db.create_all()
-            
             if not User.query.filter_by(email='admin@mydispatcher.com').first():
-                admin = User(
-                    username='admin',
-                    email='admin@mydispatcher.com',
-                    is_admin=True
-                )
+                admin = User(username='admin', email='admin@mydispatcher.com', is_admin=True)
                 admin.set_password('admin123')
                 db.session.add(admin)
-            
             if not Category.query.first():
-                categories = [
-                    Category(name='Vehicles', description='Cars, bikes, planes and more'),
-                    Category(name='Scripts', description='Game scripts and modifications'),
-                    Category(name='Maps', description='Custom maps and locations'),
-                    Category(name='Weapons', description='Custom weapons and tools'),
-                    Category(name='Characters', description='Player skins and NPCs'),
-                    Category(name='Graphics', description='Visual enhancements and textures')
-                ]
-                for cat in categories:
-                    db.session.add(cat)
-            
+                for name in ['Vehicles', 'Scripts', 'Maps', 'Weapons', 'Characters', 'Graphics']:
+                    db.session.add(Category(name=name))
             db.session.commit()
-            logger.info("Database initialized successfully")
+            logger.info("Database system ready.")
     except Exception as e:
-        logger.error(f"Error initializing database: {e}")
+        logger.error(f"FATAL: Database initialization failed: {e}")
 
 if __name__ == '__main__':
-    init_db()
-    
-    # Check if we are running on Render
-    if os.environ.get('RENDER'):
-        # On Render, we don't call app.run() as gunicorn handles it
-        pass
-    else:
-        app.run(host='0.0.0.0', port=5000, debug=True)
+    init_db_safely()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
