@@ -203,12 +203,47 @@ def browse():
         logger.error(f"Browse error: {e}")
         return redirect(url_for('index'))
 
-@app.route('/mod/<int:mod_id>')
+@app.route('/download/<int:mod_id>')
+def download_page(mod_id):
+    mod = Mod.query.get_or_404(mod_id)
+    return render_template('download.html', mod=mod)
+
+@app.route('/download/process/<int:mod_id>')
+def process_download(mod_id):
+    mod = Mod.query.get_or_404(mod_id)
+    mod.download_count += 1
+    db.session.commit()
+    return send_from_directory(os.path.dirname(mod.file_path), os.path.basename(mod.file_path), as_attachment=True)
+
+@app.route('/comment/delete/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if not current_user.is_admin and current_user.id != comment.user_id:
+        flash('Unauthorized', 'danger')
+        return redirect(url_for('index'))
+    mod_id = comment.mod_id
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted', 'success')
+    return redirect(url_for('mod_detail', mod_id=mod_id))
+
+@app.route('/mod/<int:mod_id>', methods=['GET', 'POST'])
 def mod_detail(mod_id):
     try:
         mod = Mod.query.get_or_404(mod_id)
+        form = CommentForm()
+        if form.validate_on_submit() and current_user.is_authenticated:
+            comment = Comment(content=form.content.data, user_id=current_user.id, mod_id=mod.id)
+            db.session.add(comment)
+            db.session.commit()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': True})
+            flash('Comment added!', 'success')
+            return redirect(url_for('mod_detail', mod_id=mod.id))
+        
         related = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
-        return render_template('mod_detail.html', mod=mod, related_mods=related, form=CommentForm())
+        return render_template('mod_detail.html', mod=mod, related_mods=related, form=form)
     except Exception as e:
         logger.error(f"Detail error: {e}")
         return redirect(url_for('index'))
