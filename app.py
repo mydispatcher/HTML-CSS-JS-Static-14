@@ -35,50 +35,39 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mydispatcher-secret-key-2024')
 
-# Database Connection with Safety Wrapper
 def configure_database(app):
     try:
-        # Priority 1: DATABASE_URL (Check for user-provided string or env var)
+        # Priority 1: Environment Variable (Recommended for Render/Replit)
         uri = os.environ.get('DATABASE_URL')
         
-        # User explicitly provided this Supabase URI
-        user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@db.rgeujtyfqtepjunbyxxl.supabase.co:5432/postgres"
-        
-        # Check if we're on Render (Render usually sets RENDER)
-        is_render = os.environ.get('RENDER')
-        
+        # Priority 2: Individual Replit PG variables
         if not uri or uri.strip() == "":
-            uri = user_provided_uri
-            logger.info("Using user-provided PostgreSQL URI")
-        
+            pg_user = os.environ.get('PGUSER')
+            pg_pass = os.environ.get('PGPASSWORD')
+            pg_host = os.environ.get('PGHOST')
+            pg_port = os.environ.get('PGPORT')
+            pg_db = os.environ.get('PGDATABASE')
+            if all([pg_user, pg_pass, pg_host, pg_port, pg_db]):
+                uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+
         if uri and uri.strip():
+            # Handle Render's postgres:// format
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
             
-            # CRITICAL FIX: Always fallback to SQLite if "localhost" is in the URI 
-            # and we are NOT on Render. 
-            if "localhost" in uri and not is_render:
-                logger.warning(f"Localhost detected on non-Render environment. Falling back to SQLite.")
+            # Final Safety: Detect if connection is to localhost on a platform that doesn't support it
+            # On Render, if they provide a localhost URL in DATABASE_URL, they usually mean it.
+            # But we must ensure it's not a leftover from a local dev environment.
+            if "localhost" in uri and not os.environ.get('RENDER'):
+                logger.warning("Localhost detected on non-Render environment. Falling back to SQLite.")
                 basedir = os.path.abspath(os.path.dirname(__file__))
                 return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
 
-            logger.info("Database URI configured successfully")
+            logger.info("Database URI configured successfully from environment")
             return uri
-            
-        # Priority 2: Individual PG variables (common on Replit)
-        pg_user = os.environ.get('PGUSER')
-        pg_pass = os.environ.get('PGPASSWORD')
-        pg_host = os.environ.get('PGHOST')
-        pg_port = os.environ.get('PGPORT')
-        pg_db = os.environ.get('PGDATABASE')
         
-        if all([pg_user, pg_pass, pg_host, pg_port, pg_db]) and "localhost" not in pg_host:
-            uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-            logger.info("Connected via individual PostgreSQL environment variables")
-            return uri
-            
-        # Fallback: SQLite
-        logger.warning("No remote database found. Using local SQLite.")
+        # Default Fallback: SQLite
+        logger.warning("No database configuration found. Using local SQLite.")
         basedir = os.path.abspath(os.path.dirname(__file__))
         return f"sqlite:///{os.path.join(basedir, 'mydispatcher.db')}"
     except Exception as e:

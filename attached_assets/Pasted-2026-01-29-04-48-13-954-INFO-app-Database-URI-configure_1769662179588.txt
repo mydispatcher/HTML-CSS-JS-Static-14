@@ -1,0 +1,35 @@
+2026-01-29 04:48:13,954 [INFO] app: Database URI configured successfully
+2026-01-29 04:48:17,300 [ERROR] app: DB Init Fatal: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[2026-01-29 04:48:17 +0000] [56] [INFO] Starting gunicorn 24.1.1
+[2026-01-29 04:48:17 +0000] [56] [INFO] Listening at: http://0.0.0.0:10000 (56)
+[2026-01-29 04:48:17 +0000] [56] [INFO] Using worker: sync
+[2026-01-29 04:48:17 +0000] [57] [INFO] Booting worker with pid: 57
+2026-01-29 04:48:17,998 [ERROR] app: Index error: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+127.0.0.1 - - [29/Jan/2026:04:48:17 +0000] "HEAD / HTTP/1.1" 500 0 "-" "Go-http-client/1.1"
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://html-css-js-static-14-1.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+2026-01-29 04:48:25,891 [ERROR] app: Index error: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+10.21.216.67 - - [29/Jan/2026:04:48:25 +0000] "GET / HTTP/1.1" 500 44 "-" "Go-http-client/2.0"
+2026-01-29 04:48:29,183 [ERROR] app: Index error: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+10.16.113.129 - - [29/Jan/2026:04:48:29 +0000] "GET / HTTP/1.1" 500 44 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
