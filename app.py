@@ -41,8 +41,8 @@ def configure_database(app):
         # Priority 1: DATABASE_URL (Check for user-provided string or env var)
         uri = os.environ.get('DATABASE_URL')
         
-        # User explicitly provided this URI
-        user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@localhost:5432/dispatcherstore"
+        # User explicitly provided this Supabase URI
+        user_provided_uri = "postgresql://postgres:MYDISPDJIwDWDiddyDrake_90093_MADEITUPOUTOFMYASS@db.rgeujtyfqtepjunbyxxl.supabase.co:5432/postgres"
         
         # Check if we're on Render (Render usually sets RENDER)
         is_render = os.environ.get('RENDER')
