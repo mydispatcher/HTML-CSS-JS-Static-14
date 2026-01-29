@@ -273,36 +273,170 @@ def admin():
     }
     return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users, stats=stats)
 
+class ModForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    version = StringField('Version', validators=[Length(max=50)])
+    category_id = SelectField('Category', coerce=int)
+    is_featured = BooleanField('Featured Mod')
+
 @app.route('/admin/mod/new', methods=['GET', 'POST'])
 @login_required
 def admin_new_mod():
     if not current_user.is_admin: return redirect(url_for('index'))
-    # Minimal implementation to satisfy routing
-    return "New Mod Form - Coming Soon"
+    form = ModForm()
+    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    
+    if form.validate_on_submit():
+        try:
+            mod_file = request.files.get('mod_file')
+            image_file = request.files.get('image')
+            video_file = request.files.get('video')
+            
+            if not mod_file or not image_file:
+                flash('Mod file and cover image are required', 'danger')
+                return render_template('admin/mod_form.html', form=form, title='Add New Mod')
+            
+            # Save files
+            mod_filename = secure_filename(f"{uuid.uuid4()}_{mod_file.filename}")
+            image_filename = secure_filename(f"{uuid.uuid4()}_{image_file.filename}")
+            
+            mod_path = os.path.join(app.config['UPLOAD_FOLDER'], 'mods', mod_filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_filename)
+            
+            mod_file.save(mod_path)
+            image_file.save(image_path)
+            
+            video_path = None
+            if video_file and video_file.filename:
+                video_filename = secure_filename(f"{uuid.uuid4()}_{video_file.filename}")
+                video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'videos', video_filename)
+                video_file.save(video_path)
+            
+            new_mod = Mod(
+                title=form.title.data,
+                description=form.description.data,
+                version=form.version.data,
+                category_id=form.category_id.data,
+                is_featured=form.is_featured.data,
+                file_path=mod_path,
+                image_path=image_path,
+                video_path=video_path,
+                download_token=str(uuid.uuid4())
+            )
+            
+            db.session.add(new_mod)
+            db.session.commit()
+            flash('Mod published successfully!', 'success')
+            return redirect(url_for('admin'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error saving mod: {e}")
+            flash('An error occurred while saving the mod', 'danger')
+            
+    return render_template('admin/mod_form.html', form=form, title='Add New Mod')
 
 @app.route('/admin/mod/edit/<int:mod_id>', methods=['GET', 'POST'])
 @login_required
 def admin_edit_mod(mod_id):
     if not current_user.is_admin: return redirect(url_for('index'))
-    return f"Edit Mod {mod_id} - Coming Soon"
+    mod = Mod.query.get_or_404(mod_id)
+    form = ModForm(obj=mod)
+    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    
+    if form.validate_on_submit():
+        try:
+            mod.title = form.title.data
+            mod.description = form.description.data
+            mod.version = form.version.data
+            mod.category_id = form.category_id.data
+            mod.is_featured = form.is_featured.data
+            
+            # Optional file updates
+            mod_file = request.files.get('mod_file')
+            image_file = request.files.get('image')
+            video_file = request.files.get('video')
+            
+            if mod_file and mod_file.filename:
+                mod_filename = secure_filename(f"{uuid.uuid4()}_{mod_file.filename}")
+                mod_path = os.path.join(app.config['UPLOAD_FOLDER'], 'mods', mod_filename)
+                mod_file.save(mod_path)
+                mod.file_path = mod_path
+                
+            if image_file and image_file.filename:
+                image_filename = secure_filename(f"{uuid.uuid4()}_{image_file.filename}")
+                image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_filename)
+                image_file.save(image_path)
+                mod.image_path = image_path
+                
+            if video_file and video_file.filename:
+                video_filename = secure_filename(f"{uuid.uuid4()}_{video_file.filename}")
+                video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'videos', video_filename)
+                video_file.save(video_path)
+                mod.video_path = video_path
+            
+            db.session.commit()
+            flash('Mod updated successfully!', 'success')
+            return redirect(url_for('admin'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating mod: {e}")
+            flash('An error occurred while updating the mod', 'danger')
+            
+    return render_template('admin/mod_form.html', form=form, title='Edit Mod', mod=mod)
 
 @app.route('/admin/mod/delete/<int:mod_id>', methods=['POST'])
 @login_required
 def admin_delete_mod(mod_id):
     if not current_user.is_admin: return redirect(url_for('index'))
-    return "Delete Mod - Coming Soon"
+    mod = Mod.query.get_or_404(mod_id)
+    try:
+        # Note: We keep files on disk for safety in this simple version
+        db.session.delete(mod)
+        db.session.commit()
+        flash('Mod deleted successfully', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting mod: {e}")
+        flash('Error deleting mod', 'danger')
+    return redirect(url_for('admin'))
 
 @app.route('/admin/category/new', methods=['GET', 'POST'])
 @login_required
 def admin_new_category():
     if not current_user.is_admin: return redirect(url_for('index'))
-    return "New Category Form - Coming Soon"
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        if name:
+            try:
+                cat = Category(name=name, description=description)
+                db.session.add(cat)
+                db.session.commit()
+                flash('Category added!', 'success')
+                return redirect(url_for('admin'))
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Cat error: {e}")
+                flash('Error adding category', 'danger')
+    return render_template('admin/category_form.html')
 
 @app.route('/admin/category/delete/<int:cat_id>', methods=['POST'])
 @login_required
 def admin_delete_category(cat_id):
     if not current_user.is_admin: return redirect(url_for('index'))
-    return "Delete Category - Coming Soon"
+    cat = Category.query.get_or_404(cat_id)
+    try:
+        # Reassign mods to a default or leave as null? 
+        # For this simple app, we'll just delete the category
+        db.session.delete(cat)
+        db.session.commit()
+        flash('Category deleted', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Cat delete error: {e}")
+        flash('Error deleting category', 'danger')
+    return redirect(url_for('admin'))
 
 @app.route('/settings')
 @login_required

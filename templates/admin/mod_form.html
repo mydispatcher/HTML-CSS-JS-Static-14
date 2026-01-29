@@ -57,13 +57,15 @@
                     <hr class="my-4 border-secondary">
                     
                     <div class="mb-3">
-                        <label class="form-label">Mod File (ZIP/RAR) *</label>
-                        <input type="file" name="mod_file" class="form-control" accept=".zip,.rar,.7z" required>
+                        <label class="form-label">Mod File (ZIP/RAR) {% if not mod %}*{% endif %}</label>
+                        <input type="file" name="mod_file" class="form-control" accept=".zip,.rar,.7z" {% if not mod %}required{% endif %}>
+                        {% if mod %}<small class="text-secondary">Current: {{ mod.file_path.split('/')[-1] if mod.file_path else 'None' }}</small>{% endif %}
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Cover Image *</label>
-                        <input type="file" name="image" class="form-control" accept="image/*" required>
+                        <label class="form-label">Cover Image {% if not mod %}*{% endif %}</label>
+                        <input type="file" name="image" class="form-control" accept="image/*" {% if not mod %}required{% endif %}>
+                        {% if mod %}<small class="text-secondary">Current: {{ mod.image_path.split('/')[-1] if mod.image_path else 'None' }}</small>{% endif %}
                     </div>
                     
                     <div class="mb-4">
