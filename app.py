@@ -256,6 +256,26 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/admin')
+@login_required
+def admin():
+    if not current_user.is_admin:
+        flash('Unauthorized', 'danger')
+        return redirect(url_for('index'))
+    mods = Mod.query.all()
+    categories = Category.query.all()
+    users = User.query.all()
+    return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users)
+
+@app.route('/settings')
+@login_required
+def settings():
+    return "Settings page - Coming Soon"
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 # Database Initialization
 def init_db():
     try:
@@ -273,7 +293,8 @@ def init_db():
     except Exception as e:
         logger.error(f"DB Init Fatal: {e}")
 
-init_db()
+# init_db() # Moved inside main block or handled externally to avoid issues during module imports
 
 if __name__ == '__main__':
+    init_db()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
