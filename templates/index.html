@@ -342,6 +342,17 @@
         </div>
     </nav>
 
+    <div class="hero-section" style="background: url('{{ url_for('static', filename='banner.webp') }}') center/cover no-repeat; position: relative;">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content text-center position-relative" style="z-index: 2;">
+            <h1 class="hero-title">MYDISPATCHER</h1>
+            <p class="hero-subtitle">The Ultimate GTA 5 Mod Store</p>
+            <div class="mt-4">
+                <a href="{{ url_for('browse') }}" class="btn btn-primary btn-lg px-5">Explore Mods</a>
+            </div>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-3">
