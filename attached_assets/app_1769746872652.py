@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import uuid
+from sqlalchemy.pool import NullPool
 
 # Load dotenv if available (for local development)
 try:
@@ -39,7 +40,7 @@ def configure_database(app):
     try:
         # Priority 1: Environment Variable (Recommended for Render/Replit)
         uri = os.environ.get('DATABASE_URL')
-
+        
         # Priority 2: Individual Replit PG variables
         if not uri or uri.strip() == "":
             pg_user = os.environ.get('PGUSER')
@@ -54,20 +55,15 @@ def configure_database(app):
             # Handle Render/Supabase postgres:// format
             if uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)
-
+            
             # Add SSL requirements for Supabase if not present
-            if "supabase.co" in uri and "sslmode" not in uri:
-                separator = "&" if "?" in uri else "?"
-                uri = f"{uri}{separator}sslmode=require"
-
-            # Force IPv4 for Supabase if requested (via pgbouncer port 6543 or 5432)
-            # Some environments (like Render) have trouble with IPv6 to Supabase
-            # We don't change the host here, but the user should ensure they use the 
+                # (match any supabase host like supabase.com or supabase.co)
+                if "supabase" in uri and "sslmode" not in uri:
             # connection pooling URL (port 6543) if port 5432 is blocked.
-
+            
             logger.info("Database URI configured successfully from environment")
             return uri
-
+        
         # Default Fallback: SQLite
         logger.warning("No database configuration found. Using local SQLite.")
         basedir = os.path.abspath(os.path.dirname(__file__))
@@ -79,6 +75,13 @@ def configure_database(app):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = configure_database(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Engine options: pre-ping connections and adjust pool for Supabase pooler (pgbouncer)
+app.config['SQLALCHEMY_ECHO'] = False  # Set to True to log SQL for debugging
+_db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+if _db_uri and ':6543' in _db_uri:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True, "poolclass": NullPool}
+else:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 
@@ -92,7 +95,7 @@ login_manager.login_view = 'login'
 
 # Models
 class User(UserMixin, db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -136,7 +139,7 @@ class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     mod_id = db.Column(db.Integer, db.ForeignKey('mod.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='comments')
@@ -208,15 +211,15 @@ def browse():
         cat_id = request.args.get('category', type=int)
         search = request.args.get('search', '')
         sort = request.args.get('sort', 'latest')
-
+        
         query = Mod.query
         if cat_id: query = query.filter_by(category_id=cat_id)
         if search: query = query.filter(Mod.title.ilike(f'%{search}%') | Mod.description.ilike(f'%{search}%'))
-
+        
         if sort == 'popular': query = query.order_by(Mod.download_count.desc())
         elif sort == 'oldest': query = query.order_by(Mod.created_at.asc())
         else: query = query.order_by(Mod.created_at.desc())
-
+        
         mods = query.paginate(page=page, per_page=12, error_out=False)
         return render_template('browse.html', mods=mods, categories=Category.query.all(), 
                              current_category=cat_id, search=search, sort=sort)
@@ -241,7 +244,7 @@ def download_file(mod_id):
         mod = Mod.query.get_or_404(mod_id)
         mod.download_count += 1
         db.session.commit()
-
+        
         # Clean path logic
         directory = os.path.join(app.root_path, 'uploads', 'mods')
         filename = os.path.basename(mod.file_path)
@@ -287,7 +290,7 @@ def mod_detail(mod_id):
                 return jsonify({'success': True})
             flash('Comment added!', 'success')
             return redirect(url_for('mod_detail', mod_id=mod.id))
-
+        
         related = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
         return render_template('mod_detail.html', mod=mod, related_mods=related, form=form)
     except Exception as e:
@@ -380,32 +383,32 @@ def admin_new_mod():
         if not current_user.is_admin: return redirect(url_for('index'))
         form = ModForm()
         form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-
+        
         if form.validate_on_submit():
             mod_file = request.files.get('mod_file')
             image_file = request.files.get('image')
             video_file = request.files.get('video')
-
+            
             if not mod_file or not image_file:
                 flash('Mod file and cover image are required', 'danger')
                 return render_template('admin/mod_form.html', form=form, title='Add New Mod')
-
+            
             # Save files
             mod_filename = secure_filename(f"{uuid.uuid4()}_{mod_file.filename}")
             image_filename = secure_filename(f"{uuid.uuid4()}_{image_file.filename}")
-
+            
             mod_path = os.path.join(app.config['UPLOAD_FOLDER'], 'mods', mod_filename)
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_filename)
-
+            
             mod_file.save(mod_path)
             image_file.save(image_path)
-
+            
             video_path = None
             if video_file and video_file.filename:
                 video_filename = secure_filename(f"{uuid.uuid4()}_{video_file.filename}")
                 video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'videos', video_filename)
                 video_file.save(video_path)
-
+            
             new_mod = Mod(
                 title=form.title.data,
                 description=form.description.data,
@@ -417,12 +420,12 @@ def admin_new_mod():
                 video_path=video_path,
                 download_token=str(uuid.uuid4())
             )
-
+            
             db.session.add(new_mod)
             db.session.commit()
             flash('Mod published successfully!', 'success')
             return redirect(url_for('admin'))
-
+            
         return render_template('admin/mod_form.html', form=form, title='Add New Mod')
     except Exception as e:
         db.session.rollback()
@@ -438,40 +441,40 @@ def admin_edit_mod(mod_id):
         mod = Mod.query.get_or_404(mod_id)
         form = ModForm(obj=mod)
         form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-
+        
         if form.validate_on_submit():
             mod.title = form.title.data
             mod.description = form.description.data
             mod.version = form.version.data
             mod.category_id = form.category_id.data
             mod.is_featured = form.is_featured.data
-
+            
             mod_file = request.files.get('mod_file')
             image_file = request.files.get('image')
             video_file = request.files.get('video')
-
+            
             if mod_file and mod_file.filename:
                 mod_filename = secure_filename(f"{uuid.uuid4()}_{mod_file.filename}")
                 mod_path = os.path.join(app.config['UPLOAD_FOLDER'], 'mods', mod_filename)
                 mod_file.save(mod_path)
                 mod.file_path = mod_path
-
+                
             if image_file and image_file.filename:
                 image_filename = secure_filename(f"{uuid.uuid4()}_{image_file.filename}")
                 image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_filename)
                 image_file.save(image_path)
                 mod.image_path = image_path
-
+                
             if video_file and video_file.filename:
                 video_filename = secure_filename(f"{uuid.uuid4()}_{video_file.filename}")
                 video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'videos', video_filename)
                 video_file.save(video_path)
                 mod.video_path = video_path
-
+            
             db.session.commit()
             flash('Mod updated successfully!', 'success')
             return redirect(url_for('admin'))
-
+            
         return render_template('admin/mod_form.html', form=form, title='Edit Mod', mod=mod)
     except Exception as e:
         db.session.rollback()
@@ -537,14 +540,14 @@ def settings():
         if request.method == 'POST':
             new_password = request.form.get('new_password')
             confirm_password = request.form.get('confirm_password')
-
+            
             if new_password and new_password == confirm_password:
                 current_user.set_password(new_password)
                 db.session.commit()
                 flash('Password updated successfully!', 'success')
                 return redirect(url_for('settings'))
             flash('Passwords do not match or are empty', 'danger')
-
+            
         return render_template('settings.html')
     except Exception as e:
         db.session.rollback()
