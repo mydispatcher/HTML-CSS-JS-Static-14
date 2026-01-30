@@ -170,7 +170,25 @@ class RegisterForm(FlaskForm):
 class CommentForm(FlaskForm):
     content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=1000)])
 
-# Routes
+@app.before_request
+def handle_db_session():
+    # Ensure a clean transaction for each request
+    # SQLAlchemy naturally manages this, but this serves as a safeguard
+    pass
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    if exception:
+        db.session.rollback()
+    db.session.remove()
+
+class ModForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    version = StringField('Version', validators=[Length(max=50)])
+    category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
+    is_featured = BooleanField('Featured Mod')
+
 @app.route('/')
 def index():
     try:
@@ -179,6 +197,7 @@ def index():
         categories = Category.query.all()
         return render_template('index.html', featured_mods=featured_mods, latest_mods=latest_mods, categories=categories)
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Index error: {e}")
         return "Critical system error - Refresh in a moment.", 500
 
@@ -202,24 +221,35 @@ def browse():
         return render_template('browse.html', mods=mods, categories=Category.query.all(), 
                              current_category=cat_id, search=search, sort=sort)
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Browse error: {e}")
         return redirect(url_for('index'))
 
 @app.route('/download/<int:mod_id>')
 def download_page(mod_id):
-    mod = Mod.query.get_or_404(mod_id)
-    return render_template('download.html', mod=mod)
+    try:
+        mod = Mod.query.get_or_404(mod_id)
+        return render_template('download.html', mod=mod)
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Download page error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/download/file/<int:mod_id>')
 def download_file(mod_id):
-    mod = Mod.query.get_or_404(mod_id)
-    mod.download_count += 1
-    db.session.commit()
-    
-    # Clean path logic
-    directory = os.path.join(app.root_path, 'uploads', 'mods')
-    filename = os.path.basename(mod.file_path)
-    return send_from_directory(directory, filename, as_attachment=True)
+    try:
+        mod = Mod.query.get_or_404(mod_id)
+        mod.download_count += 1
+        db.session.commit()
+        
+        # Clean path logic
+        directory = os.path.join(app.root_path, 'uploads', 'mods')
+        filename = os.path.basename(mod.file_path)
+        return send_from_directory(directory, filename, as_attachment=True)
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Download file error: {e}")
+        return redirect(url_for('index'))
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -228,15 +258,20 @@ def page_not_found(e):
 @app.route('/comment/delete/<int:comment_id>', methods=['POST'])
 @login_required
 def delete_comment(comment_id):
-    comment = Comment.query.get_or_404(comment_id)
-    if not current_user.is_admin and current_user.id != comment.user_id:
-        flash('Unauthorized', 'danger')
+    try:
+        comment = Comment.query.get_or_404(comment_id)
+        if not current_user.is_admin and current_user.id != comment.user_id:
+            flash('Unauthorized', 'danger')
+            return redirect(url_for('index'))
+        mod_id = comment.mod_id
+        db.session.delete(comment)
+        db.session.commit()
+        flash('Comment deleted', 'success')
+        return redirect(url_for('mod_detail', mod_id=mod_id))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Comment delete error: {e}")
         return redirect(url_for('index'))
-    mod_id = comment.mod_id
-    db.session.delete(comment)
-    db.session.commit()
-    flash('Comment deleted', 'success')
-    return redirect(url_for('mod_detail', mod_id=mod_id))
 
 @app.route('/mod/<int:mod_id>', methods=['GET', 'POST'])
 def mod_detail(mod_id):
@@ -256,6 +291,7 @@ def mod_detail(mod_id):
         related = Mod.query.filter(Mod.category_id == mod.category_id, Mod.id != mod.id).limit(4).all()
         return render_template('mod_detail.html', mod=mod, related_mods=related, form=form)
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Detail error for mod {mod_id}: {e}")
         return redirect(url_for('index'))
 
@@ -281,6 +317,7 @@ def login():
             flash('Invalid credentials', 'danger')
         return render_template('login.html', form=form)
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Login error: {e}")
         return redirect(url_for('index'))
 
@@ -301,48 +338,50 @@ def register():
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Reg error: {e}")
         return redirect(url_for('index'))
 
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
+    try:
+        logout_user()
+    except Exception as e:
+        logger.error(f"Logout error: {e}")
     return redirect(url_for('index'))
 
 @app.route('/admin')
 @login_required
 def admin():
-    if not current_user.is_admin:
-        flash('Unauthorized', 'danger')
+    try:
+        if not current_user.is_admin:
+            flash('Unauthorized', 'danger')
+            return redirect(url_for('index'))
+        mods = Mod.query.all()
+        categories = Category.query.all()
+        users = User.query.all()
+        stats = {
+            'total_mods': len(mods),
+            'total_users': len(users),
+            'total_downloads': sum(m.download_count for m in mods),
+            'total_categories': len(categories)
+        }
+        return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users, stats=stats)
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Admin dashboard error: {e}")
         return redirect(url_for('index'))
-    mods = Mod.query.all()
-    categories = Category.query.all()
-    users = User.query.all()
-    stats = {
-        'total_mods': len(mods),
-        'total_users': len(users),
-        'total_downloads': sum(m.download_count for m in mods),
-        'total_categories': len(categories)
-    }
-    return render_template('admin/dashboard.html', mods=mods, categories=categories, users=users, stats=stats)
-
-class ModForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    version = StringField('Version', validators=[Length(max=50)])
-    category_id = SelectField('Category', coerce=int)
-    is_featured = BooleanField('Featured Mod')
 
 @app.route('/admin/mod/new', methods=['GET', 'POST'])
 @login_required
 def admin_new_mod():
-    if not current_user.is_admin: return redirect(url_for('index'))
-    form = ModForm()
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-    
-    if form.validate_on_submit():
-        try:
+    try:
+        if not current_user.is_admin: return redirect(url_for('index'))
+        form = ModForm()
+        form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+        
+        if form.validate_on_submit():
             mod_file = request.files.get('mod_file')
             image_file = request.files.get('image')
             video_file = request.files.get('video')
@@ -383,30 +422,30 @@ def admin_new_mod():
             db.session.commit()
             flash('Mod published successfully!', 'success')
             return redirect(url_for('admin'))
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error saving mod: {e}")
-            flash('An error occurred while saving the mod', 'danger')
             
-    return render_template('admin/mod_form.html', form=form, title='Add New Mod')
+        return render_template('admin/mod_form.html', form=form, title='Add New Mod')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding mod: {e}")
+        flash('An error occurred while saving the mod', 'danger')
+        return redirect(url_for('admin'))
 
 @app.route('/admin/mod/edit/<int:mod_id>', methods=['GET', 'POST'])
 @login_required
 def admin_edit_mod(mod_id):
-    if not current_user.is_admin: return redirect(url_for('index'))
-    mod = Mod.query.get_or_404(mod_id)
-    form = ModForm(obj=mod)
-    form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
-    
-    if form.validate_on_submit():
-        try:
+    try:
+        if not current_user.is_admin: return redirect(url_for('index'))
+        mod = Mod.query.get_or_404(mod_id)
+        form = ModForm(obj=mod)
+        form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
+        
+        if form.validate_on_submit():
             mod.title = form.title.data
             mod.description = form.description.data
             mod.version = form.version.data
             mod.category_id = form.category_id.data
             mod.is_featured = form.is_featured.data
             
-            # Optional file updates
             mod_file = request.files.get('mod_file')
             image_file = request.files.get('image')
             video_file = request.files.get('video')
@@ -432,20 +471,20 @@ def admin_edit_mod(mod_id):
             db.session.commit()
             flash('Mod updated successfully!', 'success')
             return redirect(url_for('admin'))
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error updating mod: {e}")
-            flash('An error occurred while updating the mod', 'danger')
             
-    return render_template('admin/mod_form.html', form=form, title='Edit Mod', mod=mod)
+        return render_template('admin/mod_form.html', form=form, title='Edit Mod', mod=mod)
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating mod: {e}")
+        flash('An error occurred while updating the mod', 'danger')
+        return redirect(url_for('admin'))
 
 @app.route('/admin/mod/delete/<int:mod_id>', methods=['POST'])
 @login_required
 def admin_delete_mod(mod_id):
-    if not current_user.is_admin: return redirect(url_for('index'))
-    mod = Mod.query.get_or_404(mod_id)
     try:
-        # Note: We keep files on disk for safety in this simple version
+        if not current_user.is_admin: return redirect(url_for('index'))
+        mod = Mod.query.get_or_404(mod_id)
         db.session.delete(mod)
         db.session.commit()
         flash('Mod deleted successfully', 'success')
@@ -458,31 +497,30 @@ def admin_delete_mod(mod_id):
 @app.route('/admin/category/new', methods=['GET', 'POST'])
 @login_required
 def admin_new_category():
-    if not current_user.is_admin: return redirect(url_for('index'))
-    if request.method == 'POST':
-        name = request.form.get('name')
-        description = request.form.get('description')
-        if name:
-            try:
+    try:
+        if not current_user.is_admin: return redirect(url_for('index'))
+        if request.method == 'POST':
+            name = request.form.get('name')
+            description = request.form.get('description')
+            if name:
                 cat = Category(name=name, description=description)
                 db.session.add(cat)
                 db.session.commit()
                 flash('Category added!', 'success')
                 return redirect(url_for('admin'))
-            except Exception as e:
-                db.session.rollback()
-                logger.error(f"Cat error: {e}")
-                flash('Error adding category', 'danger')
-    return render_template('admin/category_form.html')
+        return render_template('admin/category_form.html')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Cat error: {e}")
+        flash('Error adding category', 'danger')
+        return redirect(url_for('admin'))
 
 @app.route('/admin/category/delete/<int:cat_id>', methods=['POST'])
 @login_required
 def admin_delete_category(cat_id):
-    if not current_user.is_admin: return redirect(url_for('index'))
-    cat = Category.query.get_or_404(cat_id)
     try:
-        # Reassign mods to a default or leave as null? 
-        # For this simple app, we'll just delete the category
+        if not current_user.is_admin: return redirect(url_for('index'))
+        cat = Category.query.get_or_404(cat_id)
         db.session.delete(cat)
         db.session.commit()
         flash('Category deleted', 'success')
@@ -495,29 +533,40 @@ def admin_delete_category(cat_id):
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    if request.method == 'POST':
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
-        
-        if new_password and new_password == confirm_password:
-            current_user.set_password(new_password)
-            db.session.commit()
-            flash('Password updated successfully!', 'success')
-            return redirect(url_for('settings'))
-        flash('Passwords do not match or are empty', 'danger')
-        
-    return render_template('settings.html')
+    try:
+        if request.method == 'POST':
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+            
+            if new_password and new_password == confirm_password:
+                current_user.set_password(new_password)
+                db.session.commit()
+                flash('Password updated successfully!', 'success')
+                return redirect(url_for('settings'))
+            flash('Passwords do not match or are empty', 'danger')
+            
+        return render_template('settings.html')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Settings error: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/admin/user/update/<int:user_id>', methods=['POST'])
 @login_required
 def update_user_rank(user_id):
-    if not current_user.is_admin: return redirect(url_for('index'))
-    user = User.query.get_or_404(user_id)
-    user.user_rank = request.form.get('rank', 'Player')
-    user.badge_color = request.form.get('badge_color', 'secondary')
-    db.session.commit()
-    flash(f'Updated {user.username}\'s rank', 'success')
-    return redirect(url_for('admin'))
+    try:
+        if not current_user.is_admin: return redirect(url_for('index'))
+        user = User.query.get_or_404(user_id)
+        user.user_rank = request.form.get('rank', 'Player')
+        user.badge_color = request.form.get('badge_color', 'secondary')
+        db.session.commit()
+        flash(f'Updated {user.username}\'s rank', 'success')
+        return redirect(url_for('admin'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating user rank: {e}")
+        flash('Error updating user rank', 'danger')
+        return redirect(url_for('admin'))
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
